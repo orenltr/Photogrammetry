@@ -43,6 +43,13 @@ class SingleImage(object):
         points = self.control_points[['x', 'y']].values
         return points.T
     
+    @property
+    def ground_coords(self): 
+        # create matrix with ground coordinates of tie points and control points
+        ground_coords = np.vstack((self.tie_points[['X', 'Y', 'Z']].values, self.control_points[['X', 'Y', 'Z']].values))
+        
+        return ground_coords
+    
     # property to get image ground bounds
     @property
     def image_ground_bounds(self):
@@ -150,10 +157,7 @@ class SingleImage(object):
         :rtype: np.ndarray (3x3)
         """
 
-        # R = Compute3DRotationMatrix(self.exteriorOrientationParameters[3], self.exteriorOrientationParameters[4],
-        #                             self.exteriorOrientationParameters[5])
-
-        return self.__rotationMatrix
+        return Compute3DRotationMatrix(*self.exteriorOrientationParameters[3:])
 
     @rotationMatrix.setter
     def rotationMatrix(self, R):
@@ -1225,7 +1229,7 @@ class SingleImage(object):
 
         return l0
 
-    def __ComputeObservationVector_RzRyRz(self, groundPoints):
+    def ComputeObservationVector(self, groundPoints):
         """
         Compute observation vector for solving the exterior orientation parameters of a single image
         based on their approximate values
@@ -1242,11 +1246,11 @@ class SingleImage(object):
         n = groundPoints.shape[0]  # number of points
 
         # Coordinates subtraction
-        dX = groundPoints[:, 0] - self.exteriorOrientationParameters[0]
-        dY = groundPoints[:, 1] - self.exteriorOrientationParameters[1]
-        dZ = groundPoints[:, 2] - self.exteriorOrientationParameters[2]
+        dX = groundPoints[:,0] - self.exteriorOrientationParameters[0]
+        dY = groundPoints[:,1] - self.exteriorOrientationParameters[1]
+        dZ = groundPoints[:,2] - self.exteriorOrientationParameters[2]
         dXYZ = np.vstack([dX, dY, dZ])
-        rotated_XYZ = np.dot(self.rotationMatrix_RzRyRz.T, dXYZ).T
+        rotated_XYZ = np.dot(self.rotationMatrix.T, dXYZ).T
 
         l0 = np.empty(n * 2)
 

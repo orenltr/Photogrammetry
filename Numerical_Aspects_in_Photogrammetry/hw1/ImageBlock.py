@@ -27,6 +27,7 @@ class ImageBlock(object):
         self.__images = images
         self.__control_points = control_points
         self.__tie_points = tie_points
+        self.__T_coordinates = tie_points[['X', 'Y', 'Z']].values.T
 
 
     # ---------------------- Properties ----------------------
@@ -77,7 +78,7 @@ class ImageBlock(object):
         :rtype: np.array nx4: [point number,X,Y,Z]
 
         """
-        return self.__T_coordinates
+        return self.tie_points[['X', 'Y', 'Z']].values
 
     @T_coordinates.setter
     def T_coordinates(self, val):
@@ -221,10 +222,11 @@ class ImageBlock(object):
             kappa = im.exteriorOrientationParameters[5]
 
             # Coordinates subtraction
-            points = np.vstack((self.T_coordinates[np.uint32(im.T_samples[:,0])-1],self.GC_coordinates[np.uint32(im.GC_samples[:,0])-1]))
-            dX = points[:, 1] - im.exteriorOrientationParameters[0]
-            dY = points[:, 2] - im.exteriorOrientationParameters[1]
-            dZ = points[:, 3] - im.exteriorOrientationParameters[2]
+            points = im.ground_coords
+            # points = np.vstack((self.T_coordinates[np.uint32(im.T_samples[:,0])-1],self.GC_coordinates[np.uint32(im.GC_samples[:,0])-1]))
+            dX = points[:, 0] - im.exteriorOrientationParameters[0]
+            dY = points[:, 1] - im.exteriorOrientationParameters[1]
+            dZ = points[:, 2] - im.exteriorOrientationParameters[2]
             dXYZ = np.vstack([dX, dY, dZ])
 
             rotationMatrixT = im.rotationMatrix.T
@@ -233,7 +235,7 @@ class ImageBlock(object):
             rT2g = rotatedG[1, :]
             rT3g = rotatedG[2, :]
 
-            focalBySqauredRT3g = im.camera.focalLength / rT3g ** 2
+            focalBySqauredRT3g = im.camera.focal_length / rT3g ** 2
 
             dxdg = rotationMatrixT[0, :][None, :] * rT3g[:, None] - rT1g[:, None] * rotationMatrixT[2, :][None, :]
             dydg = rotationMatrixT[1, :][None, :] * rT3g[:, None] - rT2g[:, None] * rotationMatrixT[2, :][None, :]
@@ -270,25 +272,25 @@ class ImageBlock(object):
             dxdZ = -focalBySqauredRT3g * np.dot(dxdg, dgdZ)
             dydZ = -focalBySqauredRT3g * np.dot(dydg, dgdZ)
 
-            # dRTdOmega = Compute3DRotationDerivativeMatrix(omega, phi, kappa, 'omega').T
-            # dRTdPhi = Compute3DRotationDerivativeMatrix(omega, phi, kappa, 'phi').T
+            dRTdOmega = Compute3DRotationDerivativeMatrix(omega, phi, kappa, 'omega').T
+            dRTdPhi = Compute3DRotationDerivativeMatrix(omega, phi, kappa, 'phi').T
             dRTdKappa = Compute3DRotationDerivativeMatrix(omega, phi, kappa, 'kappa').T
 
             gRT3g = dXYZ * rT3g
 
             # Derivatives with respect to Omega
-            # dxdOmega = -focalBySqauredRT3g * (dRTdOmega[0, :][None, :].dot(gRT3g) -
-            #                                   rT1g * (dRTdOmega[2, :][None, :].dot(dXYZ)))[0]
-            #
-            # dydOmega = -focalBySqauredRT3g * (dRTdOmega[1, :][None, :].dot(gRT3g) -
-            #                                   rT2g * (dRTdOmega[2, :][None, :].dot(dXYZ)))[0]
-            #
-            # # Derivatives with respect to Phi
-            # dxdPhi = -focalBySqauredRT3g * (dRTdPhi[0, :][None, :].dot(gRT3g) -
-            #                                 rT1g * (dRTdPhi[2, :][None, :].dot(dXYZ)))[0]
-            #
-            # dydPhi = -focalBySqauredRT3g * (dRTdPhi[1, :][None, :].dot(gRT3g) -
-            #                                 rT2g * (dRTdPhi[2, :][None, :].dot(dXYZ)))[0]
+            dxdOmega = -focalBySqauredRT3g * (dRTdOmega[0, :][None, :].dot(gRT3g) -
+                                              rT1g * (dRTdOmega[2, :][None, :].dot(dXYZ)))[0]
+            
+            dydOmega = -focalBySqauredRT3g * (dRTdOmega[1, :][None, :].dot(gRT3g) -
+                                              rT2g * (dRTdOmega[2, :][None, :].dot(dXYZ)))[0]
+            
+            # Derivatives with respect to Phi
+            dxdPhi = -focalBySqauredRT3g * (dRTdPhi[0, :][None, :].dot(gRT3g) -
+                                            rT1g * (dRTdPhi[2, :][None, :].dot(dXYZ)))[0]
+            
+            dydPhi = -focalBySqauredRT3g * (dRTdPhi[1, :][None, :].dot(gRT3g) -
+                                            rT2g * (dRTdPhi[2, :][None, :].dot(dXYZ)))[0]
 
             # Derivatives with respect to Kappa
             dxdKappa = -focalBySqauredRT3g * (dRTdKappa[0, :][None, :].dot(gRT3g) -
@@ -298,19 +300,27 @@ class ImageBlock(object):
                                               rT2g * (dRTdKappa[2, :][None, :].dot(dXYZ)))[0]
 
             # all derivatives of x and y
-            dd1 = np.array([np.vstack([dxdX0, dxdY0, dxdZ0, dxdKappa]).T,
-                           np.vstack([dydX0, dydY0, dydZ0, dydKappa]).T])
+            dd1 = np.array([np.vstack([dxdX0, dxdY0, dxdZ0, dxdOmega, dxdPhi, dxdKappa]).T,
+                           np.vstack([dydX0, dydY0, dydZ0, dydOmega, dydPhi, dydKappa]).T])
             dd2 = np.array([np.vstack([dxdX, dxdY, dxdZ]).T,
                            np.vstack([dydX, dydY, dydZ]).T])
 
-            a1 = np.zeros((2 * dd1[0].shape[0], 4*len(self.images)))
+            # divide A matrix to 2 parts: for EOP and for tie points
+            a1 = np.zeros((2 * dd1[0].shape[0], 6*len(self.images)))
             a2 = np.zeros((2 * dd2[0].shape[0], 3*len(self.T_coordinates)))
-            a1[0::2,i*4:i*4+4] = dd1[0]
-            a1[1::2,i*4:i*4+4] = dd1[1]
-            for row in range(len(im.T_samples)):
-                col = (int(im.T_samples[row,0])-1)*3
+            
+            # populate EOP derivatives 
+            a1[0::2,i*6:i*6+6] = dd1[0]
+            a1[1::2,i*6:i*6+6] = dd1[1]
+            
+            # populate tie points derivatives
+            for row in range(len(im.tie_points)):
+                # find the column of the tie point in A matrix
+                col = (int(im.tie_points['tie_block_id'][row]))*3
+                # populate derivatives
                 a2[row*2,col:col+3] = dd2[0,row]
                 a2[row*2+1,col:col+3] = dd2[1,row]
+            # combine A matrix
             a = np.hstack((a1,a2))
             if i == 0:
                 A = a
@@ -338,7 +348,7 @@ class ImageBlock(object):
         """
 
         :return:
-        :rtype: np.array (4 x images number + tie points number x3)x1
+        :rtype: np.array (6 x images number + tie points number x3)x1
         """
         OrientationParameters = self.images[0].exteriorOrientationParameters[:4]
         for i, im in enumerate(self.images[1:]):

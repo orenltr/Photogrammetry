@@ -146,7 +146,11 @@ class SimulateBlock:
         outputs:
         rotation: rotation angles in arcsec
         """
-        rotation = np.radians(np.random.normal(0, sigma, 3))        
+        # Convert sigma to radians
+        sigma_rad = np.radians(sigma / 3600)  # Convert arcseconds to degrees, then to radians
+
+        # Generate random rotation angles with sigma=2 arcseconds
+        rotation = np.random.normal(0, sigma_rad, 3)
         return rotation
         
     def simulate_image_locations(self):
@@ -190,20 +194,36 @@ class SimulateBlock:
         self.GC_points = self.simulate_control_points()
         
         # checking which points are observed in which images
+        self.tie_points['num_images'] = 0 # initialize number of images that the point is observed in
         for img in self.images:
             # checking tie points
-            df = self.tie_points.copy()
-            df['is_point_in_image'] = self.tie_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
-            # add the points that are observed in the image to the image.tie_points if they are not already there
-            img.tie_points = df[df['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
+            # df = self.tie_points.copy()
+            self.tie_points['is_point_in_image'] = self.tie_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
+            
+            # prpagate the number of images that the point is observed in
+            self.tie_points['num_images'] += self.tie_points['is_point_in_image']
+            
+             # add the points that are observed in the image to the image.tie_points 
+            img.tie_points = self.tie_points[self.tie_points['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
             
             # checking control points
-            df = self.control_points.copy()
-            df['is_point_in_image'] = self.control_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
-            # add the points that are observed in the image to the image.tie_points if they are not already there
-            img.control_points = df[df['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
+            self.control_points['is_point_in_image'] = self.control_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
             
+            # add the points that are observed in the image to the image.control_points
+            img.control_points = self.control_points[self.control_points['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
         
+        # drop 'is_point_in_image' column
+        self.tie_points = self.tie_points.drop(columns=['is_point_in_image'])
+        self.control_points = self.control_points.drop(columns=['is_point_in_image'])
+        
+        # keep only tie points that are observed in more than one image
+        self.tie_points = self.tie_points[self.tie_points['num_images']>1].reset_index(drop=True)
+        
+        # insert the index of the tie points in the block to the image tie points
+        for img in self.images:
+            img.tie_points['tie_block_id'] = img.tie_points.apply(lambda row: self.tie_points[(self.tie_points['name'] == row['name']) & (self.tie_points['image_id']==row['image_id'])].index.values[0], axis=1)
+            img.tie_points.sort_values(by=['tie_block_id'], inplace=True)
+                    
         # create block
         block = ImageBlock(self.images, self.tie_points, self.control_points)
         return block
