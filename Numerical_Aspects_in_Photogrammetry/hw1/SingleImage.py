@@ -10,7 +10,7 @@ from MatrixMethods import Compute3DRotationMatrix, Compute3DRotationDerivativeMa
 
 class SingleImage(object):
 
-    def __init__(self, camera):
+    def __init__(self, camera, name, exteriorOrientationParameters=np.array([0,0,0,0,0,0]) , tie_points=None, control_points=None):
         """
         Initialize the SingleImage object
 
@@ -22,11 +22,21 @@ class SingleImage(object):
 
         """
         self.__camera = camera
+        self.name = name
+        self.tie_points = tie_points # data frame with columns=['x', 'y', 'name', 'image_id']
         self.__innerOrientationParameters = None
         self.__isSolved = False
-        self.__exteriorOrientationParameters = np.array([0, 0, 0, 0, 0, 0], 'f')
+        self.__exteriorOrientationParameters = exteriorOrientationParameters    # np.array([X0,Y0,Z0,omega,phi,kappa])
         self.__rotationMatrix = None
-
+        
+        
+    # property to get tie points as a numpy array
+    @property
+    def tie_points_coords(self): 
+        points = self.tie_points[['x', 'y']].values
+        return points.T
+    
+    
     @property
     def innerOrientationParameters(self):
         """
@@ -728,62 +738,35 @@ class SingleImage(object):
 
 
         :type Z_values: np.array nx1
-        :type imagePoints: np.array nx2
+        :type imagePoints: np.array 2xn
         :type eop: np.ndarray 6x1
 
         :return: corresponding ground points
 
-        :rtype: np.ndarray
-
-        .. warning::
-
-             This function is empty, need implementation
-
-        .. note::
-
-            - The exterior orientation parameters needed here are called by ``self.exteriorOrientationParameters``
-            - The focal length can be called by ``self.camera.focalLength``
-
-        **Usage Example**
-
-        .. code-block:: py
-
-
-            imgPnt = np.array([-50., -33.])
-            img.ImageToGround_GivenZ(imgPnt, 115.)
+        :rtype: np.ndarray 3xn
 
         """
-        cameraPoints = self.ImageToCamera(imagePoints)
-        cameraPoints = cameraPoints.T
-        pars = self.exteriorOrientationParameters
-        X0 = pars[0]
-        Y0 = pars[1]
-        Z0 = pars[2]
+        cameraPoints = imagePoints
+        omega = self.exteriorOrientationParameters[3]
+        phi = self.exteriorOrientationParameters[4]
+        kapa = self.exteriorOrientationParameters[5]
+        X0 = self.exteriorOrientationParameters[0]
+        Y0 = self.exteriorOrientationParameters[1]
+        Z0 = self.exteriorOrientationParameters[2]
 
-        T = np.array([[X0], [Y0], [Z0]])
+        R = Compute3DRotationMatrix(omega, phi, kapa)
 
-        omega = pars[3]
-        phi = pars[4]
-        kappa = pars[5]
-        R = Compute3DRotationMatrix(omega, phi, kappa)
+        f = self.camera.focal_length
 
-        f = self.camera.focalLength
-
-        # allocating memory for return array
-        groundPoints = []
-
-        for i in range(len(cameraPoints[1])):
-            camVec = np.insert(cameraPoints[:, i], np.size(cameraPoints), -f)
-            lam = (Z_values - Z0) / (np.dot(R[2, :], camVec))
-
-            X = X0 + lam * np.dot(R[0, :], camVec)
-            Y = Y0 + lam * np.dot(R[1, :], camVec)
-
-            xy = [X, Y, Z_values]
-            groundPoints.append(xy)
-
-        groundPoints = np.array(groundPoints)
-
+        # insert -f to the end of each point
+        cameraPoints = np.vstack((cameraPoints, -f * np.ones((1, cameraPoints.shape[1]))))
+        # calculating scale factor
+        s = (Z_values - Z0) / (R[2, :].dot(cameraPoints))
+        # creating [X0,Y0,Z0] vector
+        camera_location = np.vstack((X0, Y0, Z0))
+        # calculating ground points
+        groundPoints = camera_location + s * R.dot(cameraPoints)
+        
         return groundPoints
 
     def castSize(self, scale):
@@ -1435,191 +1418,41 @@ class SingleImage(object):
         ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d
         uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d
         return np.array([ux, uy])
+    
+    def frame_to_ground(self):
+        
+        # this section defines each point
+        tl = np.array([[-self.camera.sensor_size[0]/2], [self.camera.sensor_size[1]/2]])  # top left point
+        tr = np.array([[self.camera.sensor_size[0]/2], [self.camera.sensor_size[1]/2]])  # top right point
+        bl = np.array([[-self.camera.sensor_size[0]/2], [-self.camera.sensor_size[1]/2]])  # bot left point
+        br = np.array([[self.camera.sensor_size[0]/2], [-self.camera.sensor_size[1]/2]])  # bot right point
 
+        # covert to 2x4 matrix
+        frame_points = np.hstack((tl, tr, br, bl))
+        
+        # tranform to ground system
+        ground_points = self.ImageToGround_GivenZ(frame_points, np.zeros(4))
 
-if __name__ == '__main__':
+        return ground_points
+    
+    def draw_frame(self,ax=plt.gca(), anotate=False):
+        
+        ground_points = self.frame_to_ground()
+        ground_points = np.hstack((ground_points, ground_points[:,0].reshape(3,1)))
+        ax.scatter(ground_points[0,:], ground_points[1,:], c='b', s=5)
+        ax.plot(ground_points[0,:], ground_points[1,:], color='b', label='images frames')
 
-    # sampled_points = Reader.ReadSampleFile(r"Lab7\4points_1vp_4points_2vp.json")
-    sampled_points2 = Reader.ReadSampleFile(r"Lab7\new_sampled_points.json")
-    another_one = Reader.ReadSampleFile(r"Lab7\something.json")
-    borowitz = Reader.ReadSampleFile(r"Lab7\Borowitz.json")
-    one_more1 = Reader.ReadSampleFile(r"Lab7\x_axis.json")
-    one_more2 = Reader.ReadSampleFile(r"Lab7\y_axis.json")
-    one_more3 = Reader.ReadSampleFile(r"Lab7\z_axis.json")
+        
+    def draw_tie_points(self, ax=plt.gca(), anotate=False):
+        
+        groundPoints = self.ImageToGround_GivenZ(self.tie_points_coords, np.zeros(self.tie_points_coords.shape[1]))
+        
+        # draw tie points as triangles
+        ax.scatter(groundPoints[0,:], groundPoints[1,:], c='b', s=300, label='tie points')
+        # anoate tie points using their names
+        if anotate:
+            for i, name in enumerate(self.tie_points['name']):
+                plt.annotate(name, (groundPoints[0, i], groundPoints[1, i]), size=20)
+            
+        
 
-    # points1 = np.hstack(
-    #     (sampled_points[0:5, :], np.ones((int(sampled_points[0:5, :].shape[0]), 1))))
-    # points2 = np.hstack(
-    #     (sampled_points[5:None, :], np.ones((int(sampled_points[5:None, :].shape[0]), 1))))
-
-    # points1 = np.hstack(
-    #     #     (sampled_points[::2], np.ones((int(sampled_points[::2].shape[0]), 1))))
-    #     # points2 = np.hstack(
-    #     #     (sampled_points[1::2], np.ones((int(sampled_points[1::2].shape[0]), 1))))
-
-    # fixing double sampled points
-    # sampled_points2[4, :] = sampled_points2[1, :]
-    # sampled_points2[6, :] = sampled_points2[3, :]
-    # sampled_points2[8, :] = sampled_points2[4, :]
-    # sampled_points2[9, :] = sampled_points2[5, :]
-    # sampled_points2[10, :] = sampled_points2[0, :]
-    #
-    # another_one[4, :] = another_one[0, :]
-    # another_one[8, :] = another_one[0, :]
-    # another_one[6, :] = another_one[2, :]
-    # another_one[9, :] = another_one[2, :]
-    # another_one[10, :] = another_one[5, :]
-    # another_one[11, :] = another_one[7, :]
-    # another_one = np.hstack((another_one, np.ones((max(another_one.shape), 1))))
-    #
-    # borowitz[6, :] = borowitz[0, :]
-    # borowitz[8, :] = borowitz[2, :]
-    # borowitz[10, :] = borowitz[4, :]
-    borowitz = np.hstack((borowitz, np.ones((max(borowitz.shape), 1))))
-    another_one = np.hstack((another_one, np.ones((max(another_one.shape), 1))))
-    one_more1 = np.hstack((one_more1, np.ones((max(one_more1.shape), 1))))
-    one_more2 = np.hstack((one_more2, np.ones((max(one_more2.shape), 1))))
-    one_more3 = np.hstack((one_more3, np.ones((max(one_more3.shape), 1))))
-
-    # another_one[4, :] = another_one[0, :]
-    # another_one[6, :] = another_one[2, :]
-    # another_one = np.hstack((another_one, np.ones((max(another_one.shape), 1))))
-
-    # points1 = np.hstack(
-    #     (sampled_points[0:4, :], np.ones((int(sampled_points[0:4, :].shape[0]), 1))))
-    # points2 = np.hstack(
-    #     (sampled_points[4:8, :], np.ones((int(sampled_points[4:8, :].shape[0]), 1))))
-    # points3 = np.hstack(
-    #     (sampled_points[8:None, :], np.ones((int(sampled_points[8:None, :].shape[0]), 1))))
-
-    # face1 = np.hstack((sampled_points2[0:4, :], np.ones((int(sampled_points2[0:4, :].shape[0]), 1))))
-    # face2 = np.hstack((sampled_points2[4:8, :], np.ones((int(sampled_points2[0:4, :].shape[0]), 1))))
-    # face3 = np.hstack((sampled_points2[8:None, :], np.ones((int(sampled_points2[0:4, :].shape[0]), 1))))
-
-    cam = Camera(None, None, {'K1': -0.5104e-8, 'K2': 0.1150e-12},
-                 {'P1': -0.8776e-7, 'P2': 0.1722e-7}, None, None)
-    img = SingleImage(cam)
-
-    vp1 = img.findVanishingPoint(one_more1)
-    vp2 = img.findVanishingPoint(one_more2)
-    vp3 = img.findVanishingPoint(one_more3)
-
-    # computing calibration matrix K
-    K = cam.compute_CalibrationMatrix(np.reshape(vp1, 3), np.reshape(vp2, 3), np.reshape(vp3, 3))
-
-    # computing lambdas
-    lam1 = float(cam.focalLength / np.sqrt(
-        (vp1[:, 0] - cam.principalPoint[0]) ** 2 + (vp1[:, 1] - cam.principalPoint[1]) ** 2 + cam.focalLength ** 2))
-    lam2 = float(cam.focalLength / np.sqrt(
-        (vp2[:, 0] - cam.principalPoint[0]) ** 2 + (vp2[:, 1] - cam.principalPoint[1]) ** 2 + cam.focalLength ** 2))
-    lam3 = float(cam.focalLength / np.sqrt(
-        (vp3[:, 0] - cam.principalPoint[0]) ** 2 + (vp3[:, 1] - cam.principalPoint[1]) ** 2 + cam.focalLength ** 2))
-
-    # computing R matrix from image to object space
-    # R_matrix = img.rotationMatrix_vanishingPoints(vp1, vp2)
-    R_matrix = (-1 / cam.focalLength) * np.array(
-        [[vp1[:, 0] - cam.principalPoint[0], vp2[:, 0] - cam.principalPoint[0], vp3[:, 0] - cam.principalPoint[0]]
-            , [vp1[:, 1] - cam.principalPoint[1], vp2[:, 1] - cam.principalPoint[1], vp3[:, 1] - cam.principalPoint[1]]
-            , [-cam.focalLength, -cam.focalLength, -cam.focalLength]])
-    R_matrix = np.dot(R_matrix, np.diag(np.array([lam1, lam2, lam3]))).astype(float)
-    # update object
-    img.rotationMatrix = R_matrix
-
-    R2 = np.hstack(((vp1 / la.norm(vp1)).T, (vp2 / la.norm(vp2)).T, (vp3 / la.norm(vp3)).T))
-
-    # check if what we did is correct - >
-    e1 = np.dot(np.dot(R_matrix.T, la.inv(K)), vp1.T)
-    e1 = e1 / la.norm(e1)
-
-    # try to reconstruct faces
-    face1 = Reader.ReadSampleFile(r"Lab7\face1.json")
-    face2 = Reader.ReadSampleFile(r"Lab7\face2.json")
-    face3 = Reader.ReadSampleFile(r"Lab7\face3.json")
-    # fix shared points
-    face2[0] = face1[1]
-    face2[-1] = face1[-2]
-    face3[0] = face1[0]
-    face3[1] = face1[1]
-    face3[-2] = face2[1]
-
-    face1 = np.hstack((face1, np.full((max(face1.shape), 1), -cam.focalLength)))
-    # face1 = np.hstack((face1, np.ones((max(face1.shape), 1))))
-    face2 = np.hstack((face2, np.full((max(face2.shape), 1), -cam.focalLength)))
-    face3 = np.hstack((face3, np.full((max(face3.shape), 1), -cam.focalLength)))
-
-    # correcting to 'ideal' camera system
-    for i in range(len(face1)):
-        face1[i] = np.dot(la.inv(K), face1[i])
-        face2[i] = np.dot(la.inv(K), face2[i])
-        face3[i] = np.dot(la.inv(K), face3[i])
-
-    # fig_orthographic = plt.figure()
-    # ax = fig_orthographic.add_subplot(111, projection='3d')
-    # ax.plot(face1[:, 0], face1[:, 1], face1[:, 2], marker='o')
-    # ax.plot(face2[:, 0], face2[:, 1], face2[:, 2], marker='^')
-    # ax.plot(face3[:, 0], face3[:, 1], face3[:, 2], marker='*')
-    # plt.show()
-
-    # computing vanishing points of faces
-    vp1face1 = np.cross(face1[0], face2[0])
-    vp1face1 = vp1face1 / vp1face1[-1]
-    vp2face1 = np.cross(face1[0], face1[-1])
-    vp2face1 = vp2face1 / vp2face1[-1]
-
-    vp1face2 = np.cross(face1[1], face1[2])
-    vp1face2 = vp1face2 / vp1face2[-1]
-    vp2face2 = np.cross(face1[1], face2[1])
-    vp2face2 = vp2face2 / vp2face2[-1]
-
-    vp1face3 = np.cross(face1[0], face1[1])
-    vp1face3 = vp1face3 / vp1face3[-1]
-    vp2face3 = np.cross(face1[0], face3[-1])
-    vp2face3 = vp2face3 / vp2face3[-1]
-
-    # computing face normals
-    normal_face1 = img.faceNormal_imageSpace(vp1face1, vp2face1)
-    normal_face1 = img.faceNormal_objectSpace(normal_face1)
-
-    normal_face2 = img.faceNormal_imageSpace(vp1face2, vp2face2)
-    normal_face2 = img.faceNormal_objectSpace(normal_face2)
-
-    normal_face3 = img.faceNormal_imageSpace(vp1face3, vp2face3)
-    normal_face3 = img.faceNormal_objectSpace(normal_face3)
-
-    normals = [normal_face1, normal_face2, normal_face3]
-
-    os_points1 = []
-    os_points2 = []
-    os_points3 = []
-
-    roh1 = img.scale_firstFace(normal_face1, 5, face1[0], face1[1])
-    roh2 = img.scale_firstFace(normal_face2, 10, face2[0], face2[1])
-    roh3 = img.scale_firstFace(normal_face3, 5, face3[0], face3[1])
-
-    for pnt in face1:
-        pnt = np.dot(img.rotationMatrix, pnt)
-        li = roh1 / np.dot(normal_face1, pnt)
-        os_points1.append(np.dot(li, pnt))
-
-    for pnt in face2:
-        pnt = np.dot(img.rotationMatrix, pnt)
-        li = roh2 / np.dot(normal_face2, pnt)
-        os_points2.append(np.dot(li, pnt))
-
-    for pnt in face3:
-        pnt = np.dot(img.rotationMatrix, pnt)
-        li = roh3 / np.dot(normal_face3, pnt)
-        os_points3.append(np.dot(li, pnt))
-
-    fig_orthographic = plt.figure()
-    ax = fig_orthographic.add_subplot(111, projection='3d')
-    os_points1 = np.vstack((os_points1, os_points1[0]))
-    os_points2 = np.vstack((os_points2, os_points2[0]))
-    os_points3 = np.vstack((os_points3, os_points3[0]))
-    ax.plot(os_points1[:, 0], os_points1[:, 1], os_points1[:, 2], marker='o')
-    # ax.plot(os_points2[:, 0], os_points2[:, 1], os_points2[:, 2], marker='^')
-    ax.plot(os_points3[:, 0], os_points3[:, 1], os_points3[:, 2], marker='*')
-
-    plt.show()
-
-    print('hi')
