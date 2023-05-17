@@ -299,22 +299,22 @@ class Reader:
         return data
 
 
-if __name__ == "__main__":
-    # fidImgData, fidCamData = Reader.ReadIopFile('../data/AR112-3574.iop')
-    # camFileData = Reader.ReadCamFile('../data/rc30.cam')
-    # print(camFileData['f'], camFileData['xp'], camFileData['yp'])
-    # print(camFileData['fiducials'])
-    # print(camFileData['k0'], camFileData['k1'], camFileData['k2'], camFileData['k3'])
-    # print(camFileData['p1'], camFileData['p2'], camFileData['p3'], camFileData['p4'])
-    #
-    # imgData = Reader.ReadIpfFile('../data/AR112-3574.ipf')
-    # print(imgData.keys())
-    #
-    # ctrlPnts, tiePnts = Reader.ReadGpfFile('../data/Ground Points 20150531 1.gpf')
-    # print(ctrlPnts.keys())
+# if __name__ == "__main__":
+#     # fidImgData, fidCamData = Reader.ReadIopFile('../data/AR112-3574.iop')
+#     # camFileData = Reader.ReadCamFile('../data/rc30.cam')
+#     # print(camFileData['f'], camFileData['xp'], camFileData['yp'])
+#     # print(camFileData['fiducials'])
+#     # print(camFileData['k0'], camFileData['k1'], camFileData['k2'], camFileData['k3'])
+#     # print(camFileData['p1'], camFileData['p2'], camFileData['p3'], camFileData['p4'])
+#     #
+#     # imgData = Reader.ReadIpfFile('../data/AR112-3574.ipf')
+#     # print(imgData.keys())
+#     #
+#     # ctrlPnts, tiePnts = Reader.ReadGpfFile('../data/Ground Points 20150531 1.gpf')
+#     # print(ctrlPnts.keys())
 
-    # jsonFileData = Reader.ReadSampleFile('cancel.json')
-    # print( jsonFileData)
-    # print(Reader.Readtxtfile('fiducialsImg.txt'))
-    images, grdPnts, imgPnts = Reader.photoModXMLReader('exp.x-points')
-    print(imgPnts)
+#     # jsonFileData = Reader.ReadSampleFile('cancel.json')
+#     # print( jsonFileData)
+#     # print(Reader.Readtxtfile('fiducialsImg.txt'))
+#     images, grdPnts, imgPnts = Reader.photoModXMLReader('exp.x-points')
+#     print(imgPnts)

@@ -148,23 +148,23 @@ def drawCube(corners):
     plt.show()
 
 
-if __name__ == '__main__':
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+# if __name__ == '__main__':
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111, projection='3d')
 
-    # chek if the DrawRays function works
-    # grdPnts = np.array([[201.062, 741.351, 241.987]])
-    # drawRays(grdPnts, np.array([[50], [50], [50]]))
+#     # chek if the DrawRays function works
+#     # grdPnts = np.array([[201.062, 741.351, 241.987]])
+#     # drawRays(grdPnts, np.array([[50], [50], [50]]))
 
-    # check if drawimageframe function works
-    f = 0.153
-    R = Compute3DRotationMatrix(np.pi / 3, 0, 0)
-    scale = 50
-    drawImageFrame(0.5, 0.5, R, np.array([[50], [50], [50]]), f, scale, ax)
+#     # check if drawimageframe function works
+#     f = 0.153
+#     R = Compute3DRotationMatrix(np.pi / 3, 0, 0)
+#     scale = 50
+#     drawImageFrame(0.5, 0.5, R, np.array([[50], [50], [50]]), f, scale, ax)
 
-    # check if drawOrientation function works
-    R = Compute3DRotationMatrix(np.pi / 3, 0, 0)
-    x0 = np.array([[50], [50], [50]])
-    drawOrientation(R, x0, scale, ax)
+#     # check if drawOrientation function works
+#     R = Compute3DRotationMatrix(np.pi / 3, 0, 0)
+#     x0 = np.array([[50], [50], [50]])
+#     drawOrientation(R, x0, scale, ax)
 
-    plt.show()
+#     plt.show()

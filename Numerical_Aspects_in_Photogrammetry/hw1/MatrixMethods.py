@@ -479,36 +479,36 @@ def Null(matrix):
     return np.compress(null_mask, vh, axis=0)
 
 
-if __name__ == "__main__":
-    from numpy import pi
+# if __name__ == "__main__":
+#     from numpy import pi
 
-    # Examples for creating rotation matrices
-    print('Rotation matrix with rotation around the x-axis only:')
-    print(Compute3DRotationMatrix_RzRyRz(30 * pi / 180.0, 0.0, 0.0))
-    print('Rotation matrix with rotation around the y-axis only:')
-    print(Compute3DRotationMatrix_RzRyRz(0.0, 30 * pi / 180.0, 0.0))
-    print('Rotation matrix with rotation around the z-axis only:')
-    print(Compute3DRotationMatrix_RzRyRz(0.0, 0.0, 30 * pi / 180.0))
-    print('Rotation matrix with rotation of 5, 2, and 30 around the x, y, and z axes respectively:')
-    print(Compute3DRotationMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0))
+#     # Examples for creating rotation matrices
+#     print('Rotation matrix with rotation around the x-axis only:')
+#     print(Compute3DRotationMatrix_RzRyRz(30 * pi / 180.0, 0.0, 0.0))
+#     print('Rotation matrix with rotation around the y-axis only:')
+#     print(Compute3DRotationMatrix_RzRyRz(0.0, 30 * pi / 180.0, 0.0))
+#     print('Rotation matrix with rotation around the z-axis only:')
+#     print(Compute3DRotationMatrix_RzRyRz(0.0, 0.0, 30 * pi / 180.0))
+#     print('Rotation matrix with rotation of 5, 2, and 30 around the x, y, and z axes respectively:')
+#     print(Compute3DRotationMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0))
 
-    # Examples for creating derivative matrices
-    print('The derivative matrices:')
-    print('    With respect to omega:')
-    print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'omega'))
-    print('    With respect to phi:')
-    print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'phi'))
-    print('    With respect to kappa:')
-    print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'kappa'))
-    print('    Example of sending a wrong argument:')
-    print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'Omega'))
+#     # Examples for creating derivative matrices
+#     print('The derivative matrices:')
+#     print('    With respect to omega:')
+#     print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'omega'))
+#     print('    With respect to phi:')
+#     print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'phi'))
+#     print('    With respect to kappa:')
+#     print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'kappa'))
+#     print('    Example of sending a wrong argument:')
+#     print(Compute3DRotationDerivativeMatrix_RzRyRz(5 * pi / 180.0, 2 * pi / 180.0, 30 * pi / 180.0, 'Omega'))
 
-    # Example for creating a skew matrix
-    print('Skew matrix of the vector (1, 2, 3):')
-    print(ComputeSkewMatrixFromVector(array([1, 2, 3])))
+#     # Example for creating a skew matrix
+#     print('Skew matrix of the vector (1, 2, 3):')
+#     print(ComputeSkewMatrixFromVector(array([1, 2, 3])))
 
-    # Example for using PrintMatrix
-    PrintMatrix(ComputeSkewMatrixFromVector(array([1, 2, 3])), 'Skew Matrix')
+#     # Example for using PrintMatrix
+#     PrintMatrix(ComputeSkewMatrixFromVector(array([1, 2, 3])), 'Skew Matrix')
 
-    # Example for Converting a 2D array to latex
-    print(MatrixToLatex(ComputeSkewMatrixFromVector(array([1, 2, 3])), 'B', '[-]'))
+#     # Example for Converting a 2D array to latex
+#     print(MatrixToLatex(ComputeSkewMatrixFromVector(array([1, 2, 3])), 'B', '[-]'))

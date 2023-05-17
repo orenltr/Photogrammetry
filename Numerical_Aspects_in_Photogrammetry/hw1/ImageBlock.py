@@ -3,6 +3,7 @@ from SingleImage import SingleImage
 from MatrixMethods import Compute3DRotationMatrix, Compute3DRotationDerivativeMatrix, ComputeSkewMatrixFromVector
 import numpy as np
 from numpy import linalg as la
+import pandas as pd
 import PhotoViewer as pv
 from matplotlib import pyplot as plt
 # from ImagePair import ImagePair
@@ -10,25 +11,42 @@ from matplotlib import pyplot as plt
 # import xlsxwriter
 
 class ImageBlock(object):
-    def __init__(self, images,GC_coordinates,T_data,GC_data):
+    def __init__(self, images, tie_points, control_points):
         """
         Initialize the ImageBlock class
         :param images: images of the block
-        :param GC_coordinates: ground control coordinates
-        :param T_data: tie points samples in camera system
+        :param control_points: ground control coordinates
+        :param tie_points: tie points samples in camera system
         :param GC_data: ground samples in camera system
 
         :type images: list of SingleImage
-        :type GC_coordinates: float np.array nx4:[point number,X,Y,Z]
-        :type T_data: float np.array tx4:[image number, point number,x,y]
+        :type control_points: data frame with columns=['x', 'y','z' 'name', 'image_id', 'X', 'Y', 'Z']
+        :type tie_points: data frame with columns=['x', 'y', 'name', 'image_id', 'X', 'Y', 'Z']
         :type GC_data: float np.array tx4:[image number, point number,x,y]
         """
         self.__images = images
-        self.__GC_coordinates = GC_coordinates
-        self.__T_data = T_data
-        self.__GC_data = GC_data
-        self.__T_coordinates = None
+        self.__control_points = control_points
+        self.__tie_points = tie_points
 
+
+    # ---------------------- Properties ----------------------
+    
+    # create property for tie points
+    
+    @property
+    def tie_points(self):
+        return self.__tie_points
+    
+    @tie_points.setter
+    def tie_points(self, val):
+        self.__tie_points = val
+       
+    @property
+    def scale(self):
+        alt = self.images[0].exteriorOrientationParameters[2]
+        f = self.images[0].camera.focal_length
+        return f/alt
+    
     @property
     def images(self):
         """
@@ -41,16 +59,14 @@ class ImageBlock(object):
         """
         return self.__images
     @property
-    def GC_coordinates(self):
-        """
-        ground control points coordinates
-
-        :return: ground control coordinates
-
-        :rtype: np.array nx4: [point number,X,Y,Z]
-
-        """
-        return self.__GC_coordinates
+    def control_points(self):
+        return self.__control_points
+    
+    @control_points.setter
+    def control_points(self, val):
+        self.__control_points = val
+              
+    
     @property
     def T_coordinates(self):
         """
@@ -75,6 +91,23 @@ class ImageBlock(object):
         """
 
         self.__T_coordinates = val
+        
+    @property
+    def block_boundaries(self):
+        # get images boundaries and find the min and max
+        for image in self.images:
+            image_boundaries = image.image_ground_bounds
+            if 'xmin' in locals():
+                xmin = min(xmin, image_boundaries['xmin'])
+                xmax = max(xmax, image_boundaries['xmax'])
+                ymin = min(ymin, image_boundaries['ymin'])
+                ymax = max(ymax, image_boundaries['ymax'])
+            else:
+                xmin = image_boundaries['xmin']
+                xmax = image_boundaries['xmax']
+                ymin = image_boundaries['ymin']
+                ymax = image_boundaries['ymax']
+        return {'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax}
 
     def T_estimate_values(self):
         """
@@ -85,7 +118,7 @@ class ImageBlock(object):
         """
         # finding images with same tie points
         # and compute forward intersection to get estimate coordinates
-        T_estimate_coordinates = np.zeros((int(max(self.__T_data[:, 1])), 4))
+        T_estimate_coordinates = np.zeros((int(max(self.__tie_points[:, 1])), 4))
         for i, img1 in enumerate(self.__images):
             for img2 in self.__images[i + 1:]:
                 im_pair = ImagePair(img1, img2)
@@ -329,7 +362,23 @@ class ImageBlock(object):
         for img in self.images:
             img.draw_frame(ax)
             img.draw_tie_points(ax, anotate=anotate)
-        # plt.axis('scaled')
-        # ax.legend()
-        plt.show()
+            img.draw_control_points(ax, anotate=anotate)
+            
+        return ax
+    
+    def describe_block(self):
+        # create data frame for images EOP
+        EOP = pd.DataFrame(columns=['Image', 'X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa'])
+        for img in self.images:
+            EOP.loc[len(EOP)] = [img.name] + list(img.exteriorOrientationParameters)
+        
+        print('Images EOP:')
+        print(EOP)
+        
+        print('\nTie points:')
+        print(self.tie_points)
+        
+        print('\nControl points:')
+        print(self.control_points)
+        
 

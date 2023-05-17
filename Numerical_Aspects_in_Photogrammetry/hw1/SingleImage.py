@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import linalg as la
 from matplotlib import pyplot as plt
+import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from Camera import *
 from Reader import *
@@ -23,7 +24,8 @@ class SingleImage(object):
         """
         self.__camera = camera
         self.name = name
-        self.tie_points = tie_points # data frame with columns=['x', 'y', 'name', 'image_id']
+        self.tie_points = tie_points # data frame with columns=['x', 'y', 'name', 'image_id', 'X', 'Y', 'Z']
+        self.control_points = control_points # data frame with columns=['x', 'y', 'name', 'image_id', 'X', 'Y', 'Z']
         self.__innerOrientationParameters = None
         self.__isSolved = False
         self.__exteriorOrientationParameters = exteriorOrientationParameters    # np.array([X0,Y0,Z0,omega,phi,kappa])
@@ -36,6 +38,32 @@ class SingleImage(object):
         points = self.tie_points[['x', 'y']].values
         return points.T
     
+    @property
+    def control_points_coords(self): 
+        points = self.control_points[['x', 'y']].values
+        return points.T
+    
+    # property to get image ground bounds
+    @property
+    def image_ground_bounds(self):
+        ground_points = self.frame_to_ground()
+        # create dictionary with bounds
+        bounds = {'xmin': np.min(ground_points[0,:]), 'xmax': np.max(ground_points[0,:]),
+                    'ymin': np.min(ground_points[1,:]), 'ymax': np.max(ground_points[1,:])}
+        return bounds
+    
+    @property
+    def scale(self):
+        """
+        Scale of the image
+
+        :return: scale of the image
+
+        :rtype: float
+        """
+        alt = self.exteriorOrientationParameters[2]
+        f = self.camera.focal_length
+        return f / alt
     
     @property
     def innerOrientationParameters(self):
@@ -1435,24 +1463,57 @@ class SingleImage(object):
 
         return ground_points
     
-    def draw_frame(self,ax=plt.gca(), anotate=False):
+    def draw_frame(self,ax=[], anotate=False):
         
+        # project frame points to ground
         ground_points = self.frame_to_ground()
+        
+        # add first point to the end to close the frame
         ground_points = np.hstack((ground_points, ground_points[:,0].reshape(3,1)))
+        
+        # plot the frame corners
         ax.scatter(ground_points[0,:], ground_points[1,:], c='b', s=5)
-        ax.plot(ground_points[0,:], ground_points[1,:], color='b', label='images frames')
+        # plot the frame in random color
+        # Shuffle the color palette randomly
+        # Choose a predefined color palette
+        palette = mpl.colormaps['hsv']
+        # choose a random color from hsv palette
+        c = palette(np.random.randint(0, 255))
+        
+        ax.plot(ground_points[0,:], ground_points[1,:], color=c, label='images frames', linewidth=5)
 
         
-    def draw_tie_points(self, ax=plt.gca(), anotate=False):
-        
-        groundPoints = self.ImageToGround_GivenZ(self.tie_points_coords, np.zeros(self.tie_points_coords.shape[1]))
-        
-        # draw tie points as triangles
-        ax.scatter(groundPoints[0,:], groundPoints[1,:], c='b', s=300, label='tie points')
+    def draw_tie_points(self, ax=[], anotate=False):
+        ax.scatter(self.tie_points['X'], self.tie_points['Y'], c='b', s=10*(1/self.scale), label='tie points')
+
         # anoate tie points using their names
         if anotate:
-            for i, name in enumerate(self.tie_points['name']):
-                plt.annotate(name, (groundPoints[0, i], groundPoints[1, i]), size=20)
+            self.tie_points.apply(lambda row: ax.annotate(row['name'], (row['X'], row['Y']), size=1*(1/self.scale)), axis=1)
+    
+    def draw_control_points(self, ax=[], anotate=False):
+        ax.scatter(self.control_points['X'], self.control_points['Y'], marker='^', color='r', s=10*(1/self.scale) , label='GC')
+
+        # anoate tie points using their names
+        if anotate:
+            self.control_points.apply(lambda row: ax.annotate(row['name'], (row['X'], row['Y']), size=1*(1/self.scale)), axis=1)
             
         
 
+    def is_point_in_image(self, point):
+        """
+        Check if a point is in the image
+
+        :param point: point in image space
+
+        :type point: np.array 1x3
+
+        :return: True if the point is in the image, False otherwise
+        :rtype: bool
+        """
+        # check if the point is in the image ground boundaries
+        if point[0]<self.image_ground_bounds['xmin'] or point[0]>self.image_ground_bounds['xmax'] or \
+            point[1]<self.image_ground_bounds['ymin'] or point[1]>self.image_ground_bounds['ymax']:
+            return False
+        else:
+            return True
+        
