@@ -5,10 +5,11 @@ import MatrixMethods as mm
 from SingleImage import *
 from ImageBlock import *
 from Camera import Camera
+import copy
 
 # create class for simulate block of images
 class SimulateBlock:
-    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotaions_sigma=5, altitude=100):
+    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotaions_sigma=5, altitude=100, sigma_rotation_noise=None, sigma_location_noise=None):
         
         self.focal_length = focal_length # in mm
         self.image_size = image_size # tuple of (width, height) in mm
@@ -19,7 +20,10 @@ class SimulateBlock:
         self.num_control_points = num_control_points
         self.rotaions_sigma = rotaions_sigma # in arcsec
         self.altitude = altitude # in m
+        self.sigma_rotation_noise = sigma_rotation_noise # in arcsec
+        self.sigma_location_noise = sigma_location_noise # in m
         self.images = []
+        self.images_noisy = []
         self.tie_points = pd.DataFrame(columns=['x', 'y', 'name', 'image_id', 'X', 'Y', 'Z'])
         self.control_points = []
         self.camera = Camera(focal_length, image_size)
@@ -166,7 +170,26 @@ class SimulateBlock:
         for i in range(self.num_images):
             image_locations.append((i*self.image_width*(1-self.overlap)*(1/self.scale), 0, self.altitude))
         return image_locations
-
+    
+    # add noise to the EOP of the images
+    def add_noise_to_EOP(self):
+        """Add noise to the EOP of the images
+        inputs:
+        sigma_rotation: standard deviation of rotation angles in arcsec
+        sigma_location: standard deviation of location in m
+        outputs:
+        None
+        """
+        # add noise to EOP
+        
+        for img in self.images_noisy:
+            if self.sigma_rotation_noise is not None:                
+                # add noise to rotation angles
+                img.exteriorOrientationParameters[3:] += self.simulate_rotation(self.sigma_rotation_noise)
+            if self.sigma_location_noise is not None:  
+                # add noise to location
+                img.exteriorOrientationParameters[:3] += np.random.normal(0, self.sigma_location_noise, 3)
+                
     def simulate_block(self):
         """Simulate block of images
         inputs:
@@ -191,7 +214,7 @@ class SimulateBlock:
             self.images.append(image)
         
         # simulate control points
-        self.GC_points = self.simulate_control_points()
+        self.simulate_control_points()
         
         # checking which points are observed in which images
         self.tie_points['num_images'] = 0 # initialize number of images that the point is observed in
@@ -200,17 +223,20 @@ class SimulateBlock:
             # df = self.tie_points.copy()
             self.tie_points['is_point_in_image'] = self.tie_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
             
-            # prpagate the number of images that the point is observed in
+            # propagate the number of images that the point is observed in
             self.tie_points['num_images'] += self.tie_points['is_point_in_image']
             
              # add the points that are observed in the image to the image.tie_points 
             img.tie_points = self.tie_points[self.tie_points['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
+            img.tie_points[['x', 'y']] = img.GroundToImage_fast(img.tie_points[['X', 'Y', 'Z']].values)
             
             # checking control points
             self.control_points['is_point_in_image'] = self.control_points.apply(lambda row: img.is_point_in_image((row['X'], row['Y'], row['Z'])), axis=1)
             
             # add the points that are observed in the image to the image.control_points
             img.control_points = self.control_points[self.control_points['is_point_in_image']==True].drop(columns=['is_point_in_image']).reset_index(drop=True)
+            # convert control points to image coordinates
+            img.control_points[['x', 'y']] = img.GroundToImage_fast(img.control_points[['X', 'Y', 'Z']].values)
         
         # drop 'is_point_in_image' column
         self.tie_points = self.tie_points.drop(columns=['is_point_in_image'])
@@ -224,9 +250,14 @@ class SimulateBlock:
             img.tie_points['tie_block_id'] = img.tie_points.apply(lambda row: self.tie_points[(self.tie_points['name'] == row['name']) & (self.tie_points['image_id']==row['image_id'])].index.values[0], axis=1)
             img.tie_points.sort_values(by=['tie_block_id'], inplace=True)
                     
+        # add noise to EOP
+        self.images_noisy = copy.deepcopy(self.images)
+        self.add_noise_to_EOP()
+        
         # create block
-        block = ImageBlock(self.images, self.tie_points, self.control_points)
+        block = ImageBlock(copy.deepcopy(self.images_noisy), self.tie_points.copy(), self.control_points.copy())
         return block
     
+
 
     

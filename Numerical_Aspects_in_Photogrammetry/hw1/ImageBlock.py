@@ -26,8 +26,7 @@ class ImageBlock(object):
         """
         self.__images = images
         self.__control_points = control_points
-        self.__tie_points = tie_points
-        self.__T_coordinates = tie_points[['X', 'Y', 'Z']].values.T
+        self.__tie_points = tie_points        
 
 
     # ---------------------- Properties ----------------------
@@ -91,7 +90,7 @@ class ImageBlock(object):
 
         """
 
-        self.__T_coordinates = val
+        self.tie_points[['X', 'Y', 'Z']] = val
         
     @property
     def block_boundaries(self):
@@ -142,39 +141,58 @@ class ImageBlock(object):
         :return: exterior orientation parameters, tie points coordinate, RMSE, covariance matrix
         :rtype: np.array nx1, scalar, np.array mxm
         """
-
-        points_coordinate = np.vstack((self.images[0].T_samples,self.images[0].GC_samples))
+        
+        
 
         # creating lb vector
         lb = self.create_lb_vector()
+        
+        # create vaiables to track the values of the variables
+        # create a data frame with columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa'] for each image and tie points coordinates and iteration number
+        variables = pd.DataFrame(columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa']*len(self.images)+['X', 'Y', 'Z']*len(self.T_coordinates))
+        observation = pd.DataFrame(columns=['x', 'y']*int(len(lb)/2))
 
         dx = np.ones([6, 1]) * 100000
         itr = 0
         while la.norm(dx) > epsilon and itr < max_itr:
-            itr = itr+1
+            itr += 1
             X = self.compute_variables_vector()
             l0 = self.compute_observation_vector()
             L = lb - l0
             A = self.ComputeDesignMatrix()
+            
+            # convert all to float64
+            lb = lb.astype(np.float64)
+            X = X.astype(np.float64)
+            l0 = l0.astype(np.float64)
+            L = L.astype(np.float64)
+            A = A.astype(np.float64)
+            
+            # update variables data frame
+            variables.loc[len(variables)] = np.ravel(X)
+            # update observation data frame
+            observation.loc[len(observation)] = np.ravel(l0)
+            
             U = np.dot(A.T, L)
             N = np.dot(A.T, A)
+            
+            # print report for iteration of A, X, L statistics
+            print('iteration: ', itr, 'norm(A): ', la.norm(A), 'norm(X): ', la.norm(X), 'norm(L): ', la.norm(L))
+            # print report for iteration of exterior orientation parameters and camera coordinates
+            print('EOP: ', X[:6*len(self.images)])
+                        
 
             # Schur Complement
-            N11 = N[:4*len(self.images),:4*len(self.images)]
-            N12 = N[:4*len(self.images),4*len(self.images):]
-            N21 = N[4*len(self.images):,:4*len(self.images)]
-            N22 = N[4*len(self.images):,4*len(self.images):]
-            u1 = U[:4 * len(self.images)]
-            u2 = U[4 * len(self.images):]
-            N22_inv = la.inv(N22)
-            dx_o = np.dot(la.inv(N11-N12.dot(N22_inv).dot(N12.T)),(u1-N12.dot(N22_inv).dot(u2)))
-            dx_t = np.dot(N22_inv,(u2-np.dot(N12.T,dx_o)))
-            dx = np.hstack((dx_o,dx_t))
-            # plotting normal matrix
+            N11 = N[:6*len(self.images),:6*len(self.images)]
+            N12 = N[:6*len(self.images),6*len(self.images):]
+            N21 = N[6*len(self.images):,:6*len(self.images)]
+            N22 = N[6*len(self.images):,6*len(self.images):]
+            
+            # # plotting normal matrix
             # plt.figure()
             # plt.spy(N)
             # plt.title('N matrix')
-            # plt.figure()
+            # plt.figure(figsize=(10,10))
             # plt.subplot(221)
             # plt.spy(N11)
             # plt.title('N11')
@@ -188,15 +206,25 @@ class ImageBlock(object):
             # plt.spy(N22)
             # plt.title('N22 ')
             # plt.show()
+            
+            u1 = U[:6 * len(self.images)]
+            u2 = U[6 * len(self.images):]
+            N22_inv = la.inv(N22)
+            dx_o = np.dot(la.inv(N11-N12.dot(N22_inv).dot(N12.T)),(u1-N12.dot(N22_inv).dot(u2)))
+            dx_t = np.dot(N22_inv,(u2-np.dot(N12.T,dx_o)))
+            dx = np.hstack((dx_o,dx_t))
+            # dx = la.solve(np.dot(A.T, A), np.dot(A.T, L))
             # dx = np.dot(la.inv(N), U)
             X = X + dx
             v = A.dot(dx) - L
             RMSE = np.sqrt(np.dot(v.T,v)/(A.shape[0]-A.shape[1]))
+            
+            print('iteration: ', itr, 'RMSE: ', RMSE, 'norm(dx): ', la.norm(dx))
 
             # updatind tie points values and exteriorOrientationParameters
             for i, im in enumerate(self.images):
-                im.exteriorOrientationParameters[[0,1,2,5]] = X[4*i:4*i+4]
-            self.T_coordinates[:,1:] = np.reshape(X[4*len(self.images):],(len(self.T_coordinates),3))
+                im.exteriorOrientationParameters = X[6*i:6*i+6]
+            self.T_coordinates = np.reshape(X[6*len(self.images):],(len(self.T_coordinates),3))
 
         sigmaX = RMSE**2 * (np.linalg.inv(N))
         return X,RMSE,sigmaX
@@ -335,9 +363,8 @@ class ImageBlock(object):
         :return: observation vector
         :rtype: np.array  (2 x samples)x1
         """
-        for i, im in enumerate(self.images):
-            points_coordinate = np.vstack((self.T_coordinates[np.uint32(im.T_samples[:,0])-1],self.GC_coordinates[np.uint32(im.GC_samples[:,0])-1]))
-            l0_temp = im.ComputeObservationVector(points_coordinate[:,1:])
+        for i, im in enumerate(self.images):            
+            l0_temp = im.ComputeObservationVector()
             if i == 0:
                 l0 = l0_temp
             else:
@@ -350,16 +377,19 @@ class ImageBlock(object):
         :return:
         :rtype: np.array (6 x images number + tie points number x3)x1
         """
-        OrientationParameters = self.images[0].exteriorOrientationParameters[:4]
+        OrientationParameters = self.images[0].exteriorOrientationParameters
         for i, im in enumerate(self.images[1:]):
-            OrientationParameters = np.hstack((OrientationParameters,im.exteriorOrientationParameters[:4]))
+            OrientationParameters = np.hstack((OrientationParameters,im.exteriorOrientationParameters))
 
-        return np.hstack((OrientationParameters,np.ravel(self.T_coordinates[:,1:])))
+        return np.hstack((OrientationParameters,np.ravel(self.T_coordinates)))
 
     def create_lb_vector(self):
-        lb = np.hstack((np.ravel(self.images[0].T_samples[:,1:]),np.ravel(self.images[0].GC_samples[:,1:])))
+        
+        # initialize lb vector with exterior orientation parameters of the first image
+        lb =np.hstack((np.ravel(self.images[0].tie_points_cam_coords.T),np.ravel(self.images[0].control_points_cam_coords.T)))
+        # add exterior orientation parameters of the rest of the images
         for i, im in enumerate(self.images[1:]):
-            lb =np.hstack((lb,np.ravel(im.T_samples[:,1:]),np.ravel(im.GC_samples[:,1:])))
+            lb =np.hstack((lb,np.ravel(im.tie_points_cam_coords.T),np.ravel(im.control_points_cam_coords.T)))            
         return lb
 
     def draw_block(self, anotate=False):

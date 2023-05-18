@@ -34,21 +34,36 @@ class SingleImage(object):
         
     # property to get tie points as a numpy array
     @property
-    def tie_points_coords(self): 
+    def tie_points_cam_coords(self): 
         points = self.tie_points[['x', 'y']].values
         return points.T
     
     @property
-    def control_points_coords(self): 
+    def tie_points_ground_coords(self):         
+        return self.tie_points[['X', 'Y', 'Z']].values
+    
+    @property
+    def control_points_cam_coords(self): 
         points = self.control_points[['x', 'y']].values
         return points.T
     
     @property
+    def control_points_ground_coords(self):
+        return self.control_points[['X', 'Y', 'Z']].values
+    
+    @property
     def ground_coords(self): 
         # create matrix with ground coordinates of tie points and control points
-        ground_coords = np.vstack((self.tie_points[['X', 'Y', 'Z']].values, self.control_points[['X', 'Y', 'Z']].values))
-        
+        ground_coords = np.vstack((self.tie_points[['X', 'Y', 'Z']].values, self.control_points[['X', 'Y', 'Z']].values))        
         return ground_coords
+    
+    @property
+    def num_tie_points(self):
+        return len(self.tie_points)
+    
+    @property
+    def num_control_points(self):
+        return len(self.control_points)
     
     # property to get image ground bounds
     @property
@@ -690,6 +705,30 @@ class SingleImage(object):
 
         # return self.CameraToImage(np.array(camPoints))
         return (np.array(camPoints))
+    
+    def GroundToImage_fast(self, groundPoints):
+        # EOP
+        X0 = float(self.exteriorOrientationParameters[0])
+        Y0 = float(self.exteriorOrientationParameters[1])
+        Z0 = float(self.exteriorOrientationParameters[2])
+        R = self.rotationMatrix.T
+        f = self.camera.focal_length
+        
+        # Coordinates subtraction
+        dX = groundPoints[:, 0] - self.exteriorOrientationParameters[0]
+        dY = groundPoints[:, 1] - self.exteriorOrientationParameters[1]
+        dZ = groundPoints[:, 2] - self.exteriorOrientationParameters[2]
+        dXYZ = np.vstack([dX, dY, dZ])
+
+        rotationMatrixT = self.rotationMatrix.T
+        rotatedG = rotationMatrixT.dot(dXYZ)
+        rT1g = rotatedG[0, :]
+        rT2g = rotatedG[1, :]
+        rT3g = rotatedG[2, :]
+        x = -f * rT1g / rT3g
+        y = -f * rT2g / rT3g
+        
+        return np.vstack([x, y]).T
 
     def GroundToImage_RzRyRz(self, groundPoints):
         """
@@ -1229,7 +1268,7 @@ class SingleImage(object):
 
         return l0
 
-    def ComputeObservationVector(self, groundPoints):
+    def ComputeObservationVector(self):
         """
         Compute observation vector for solving the exterior orientation parameters of a single image
         based on their approximate values
@@ -1242,7 +1281,11 @@ class SingleImage(object):
 
         :rtype: np.array nx1
         """
-
+        groundPoints = self.ground_coords
+        # tie_coords = self.tie_points_ground_coords
+        # control_coords = self.control_points_ground_coords
+        
+        # n = tie_coords.shape[0]+ control_coords.shape[0]  # number of points
         n = groundPoints.shape[0]  # number of points
 
         # Coordinates subtraction
@@ -1252,11 +1295,11 @@ class SingleImage(object):
         dXYZ = np.vstack([dX, dY, dZ])
         rotated_XYZ = np.dot(self.rotationMatrix.T, dXYZ).T
 
-        l0 = np.empty(n * 2)
+        l0 = np.zeros(n * 2)
 
         # Computation of the observation vector based on approximate exterior orientation parameters:
-        l0[::2] = -self.camera.focalLength * rotated_XYZ[:, 0] / rotated_XYZ[:, 2]
-        l0[1::2] = -self.camera.focalLength * rotated_XYZ[:, 1] / rotated_XYZ[:, 2]
+        l0[::2] = -self.camera.focal_length * rotated_XYZ[:, 0] / rotated_XYZ[:, 2]
+        l0[1::2] = -self.camera.focal_length * rotated_XYZ[:, 1] / rotated_XYZ[:, 2]
 
         return l0
 
