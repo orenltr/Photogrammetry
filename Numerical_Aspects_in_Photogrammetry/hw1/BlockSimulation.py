@@ -143,19 +143,7 @@ class SimulateBlock:
         control_points['Z'] = 0
         return control_points
                 
-    def simulate_rotation(self, sigma):
-        """Simulate rotation angles in arcsec
-        inputs:
-        sigma: standard deviation of rotation angles in arcsec
-        outputs:
-        rotation: rotation angles in arcsec
-        """
-        # Convert sigma to radians
-        sigma_rad = np.radians(sigma / 3600)  # Convert arcseconds to degrees, then to radians
-
-        # Generate random rotation angles with sigma=2 arcseconds
-        rotation = np.random.normal(0, sigma_rad, 3)
-        return rotation
+    
         
     def simulate_image_locations(self):
         """Simulate image locations
@@ -250,13 +238,56 @@ class SimulateBlock:
             img.tie_points['tie_block_id'] = img.tie_points.apply(lambda row: self.tie_points[(self.tie_points['name'] == row['name']) & (self.tie_points['image_id']==row['image_id'])].index.values[0], axis=1)
             img.tie_points.sort_values(by=['tie_block_id'], inplace=True)
                     
-        # add noise to EOP
-        self.images_noisy = copy.deepcopy(self.images)
-        self.add_noise_to_EOP()
+        # # add noise to EOP
+        # self.images_noisy = copy.deepcopy(self.images)
+        # self.add_noise_to_EOP()
         
         # create block
-        block = ImageBlock(copy.deepcopy(self.images_noisy), self.tie_points.copy(), self.control_points.copy())
+        block = ImageBlock(copy.deepcopy(self.images), self.tie_points.copy(), self.control_points.copy())
         return block
+    
+    @staticmethod
+    def simulate_rotation(sigma):
+        """Simulate rotation angles in arcsec
+        inputs:
+        sigma: standard deviation of rotation angles in arcsec
+        outputs:
+        rotation: rotation angles in arcsec
+        """
+        # Convert sigma to radians
+        sigma_rad = np.radians(sigma / 3600)  # Convert arcseconds to degrees, then to radians
+
+        # Generate random rotation angles with sigma=2 arcseconds
+        rotation = np.random.normal(0, sigma_rad, 3)
+        return rotation
+    
+    @staticmethod
+    def add_noise_to_block(block, sigma_rotation=None, sigma_location=None, sigma_tie_points=None, sigma_control_points=None):
+        """Add noise to the EOP of the images
+        inputs:
+        sigma_rotation: standard deviation of rotation angles in arcsec
+        sigma_location: standard deviation of location in m
+        sigma_tie_points: standard deviation of tie points in microns
+        sigma_control_points: standard deviation of control points in m
+        outputs:
+        None
+        """
+        # add noise to EOP
+        
+        for img in block.images:
+            if sigma_rotation is not None:                
+                # add noise to rotation angles
+                img.exteriorOrientationParameters[3:] += SimulateBlock.simulate_rotation(sigma_rotation)
+            if sigma_location is not None:  
+                # add noise to location
+                img.exteriorOrientationParameters[:3] += np.random.normal(0, sigma_location, 3)
+            if sigma_tie_points is not None:
+                # add noise to tie points in microns
+                img.tie_points[['x', 'y']] += np.random.normal(0, sigma_tie_points, img.tie_points[['x', 'y']].shape) * 1e-3
+            if sigma_control_points is not None:
+                # add noise to control points
+                img.control_points[['X', 'Y', 'Z']] += np.random.normal(0, sigma_control_points, img.control_points[['X', 'Y', 'Z']].shape)
+        
     
 
 
