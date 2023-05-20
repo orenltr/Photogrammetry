@@ -26,7 +26,8 @@ class ImageBlock(object):
         """
         self.__images = images
         self.__control_points = control_points
-        self.__tie_points = tie_points        
+        self.__tie_points = tie_points
+        self.block_points = self.block_points()  
 
 
     # ---------------------- Properties ----------------------
@@ -91,7 +92,9 @@ class ImageBlock(object):
         """
 
         self.tie_points[['X', 'Y', 'Z']] = val
-        
+    
+    
+    
     @property
     def block_boundaries(self):
         # get images boundaries and find the min and max
@@ -108,6 +111,21 @@ class ImageBlock(object):
                 ymin = image_boundaries['ymin']
                 ymax = image_boundaries['ymax']
         return {'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax}
+
+    # merge tie points and control points of all images to one data frame
+    def block_points(self):
+        # get tie points and control points of all images
+        for image in self.images:
+            if 'block_points' in locals():
+                temp = pd.concat([image.tie_points, image.control_points])
+                temp['image_id'] = image.name
+                block_points = pd.concat([block_points, temp])
+            else:
+                block_points = pd.concat([image.tie_points, image.control_points])
+                block_points['image_id'] = image.name
+        block_points = block_points.reset_index(drop=True)
+            
+        return block_points
 
     def T_estimate_values(self):
         """
@@ -133,11 +151,12 @@ class ImageBlock(object):
                 T_estimate_coordinates[np.uint32(T_estimate_coordinates_temp[:, 0] - 1)] = T_estimate_coordinates_temp
         self.T_coordinates = T_estimate_coordinates
 
-    def BundleAdjustment(self, epsilon, max_itr):
+    def BundleAdjustment(self, epsilon, max_itr, method='naiv', **kwargs):
         """
         BundleAdjustment for images block
         :param epsilon: stoping condition for norm(dx)
         :param max_itr: maximum number of iterations
+        :param method: method for solving the normal equation (naiv, schur)
         :return: exterior orientation parameters, tie points coordinate, RMSE, covariance matrix
         :rtype: np.array nx1, scalar, np.array mxm
         """
@@ -173,53 +192,48 @@ class ImageBlock(object):
             # update observation data frame
             observation.loc[len(observation)] = np.ravel(l0)
             
-            U = np.dot(A.T, L)
-            N = np.dot(A.T, A)
-            
             # print report for iteration of A, X, L statistics
-            print('iteration: ', itr, 'norm(A): ', la.norm(A), 'norm(X): ', la.norm(X), 'norm(L): ', la.norm(L))
+            print('------------------------------------------------------------------------------')
+            print('iteration: ', itr, '\n norm(A): ', la.norm(A), 'norm(X): ', la.norm(X), 'norm(L): ', la.norm(L),'\n')
             # print report for iteration of exterior orientation parameters and camera coordinates
-            print('EOP: ', X[:6*len(self.images)])
-                        
-
-            # Schur Complement
-            N11 = N[:6*len(self.images),:6*len(self.images)]
-            N12 = N[:6*len(self.images),6*len(self.images):]
-            N21 = N[6*len(self.images):,:6*len(self.images)]
-            N22 = N[6*len(self.images):,6*len(self.images):]
+            print('EOP: ', X[:6*len(self.images)],'\n')
             
-            # # plotting normal matrix
-            # plt.figure()
-            # plt.spy(N)
-            # plt.title('N matrix')
-            # plt.figure(figsize=(10,10))
-            # plt.subplot(221)
-            # plt.spy(N11)
-            # plt.title('N11')
-            # plt.subplot(222)
-            # plt.spy(N12)
-            # plt.title('N12')
-            # plt.subplot(223)
-            # plt.spy(N21)
-            # plt.title('N21')
-            # plt.subplot(224)
-            # plt.spy(N22)
-            # plt.title('N22 ')
-            # plt.show()
+            if method == 'naiv':
+                U = np.dot(A.T, L)
+                N = np.dot(A.T, A)
+                dx = np.dot(la.inv(N), U)
+                
+            elif method == 'schur':
+                
             
-            u1 = U[:6 * len(self.images)]
-            u2 = U[6 * len(self.images):]
-            N22_inv = la.inv(N22)
-            dx_o = np.dot(la.inv(N11-N12.dot(N22_inv).dot(N12.T)),(u1-N12.dot(N22_inv).dot(u2)))
-            dx_t = np.dot(N22_inv,(u2-np.dot(N12.T,dx_o)))
-            dx = np.hstack((dx_o,dx_t))
+                                    
+            
+            
+                # Schur Complement
+                N11 = N[:6*len(self.images),:6*len(self.images)]
+                N12 = N[:6*len(self.images),6*len(self.images):]
+                N21 = N[6*len(self.images):,:6*len(self.images)]
+                N22 = N[6*len(self.images):,6*len(self.images):]
+                
+                if 'plotNormal' in kwargs:
+                    if kwargs['plotNormal'] :
+                        # # plotting normal matrix
+                        ImageBlock.plotNormalMatrix(N)
+                
+                
+                u1 = U[:6 * len(self.images)]
+                u2 = U[6 * len(self.images):]
+                N22_inv = la.inv(N22)
+                dx_o = np.dot(la.inv(N11-N12.dot(N22_inv).dot(N12.T)),(u1-N12.dot(N22_inv).dot(u2)))
+                dx_t = np.dot(N22_inv,(u2-np.dot(N12.T,dx_o)))
+                dx = np.hstack((dx_o,dx_t))
             # dx = la.solve(np.dot(A.T, A), np.dot(A.T, L))
-            # dx = np.dot(la.inv(N), U)
+            
             X = X + dx
             v = A.dot(dx) - L
             RMSE = np.sqrt(np.dot(v.T,v)/(A.shape[0]-A.shape[1]))
             
-            print('iteration: ', itr, 'RMSE: ', RMSE, 'norm(dx): ', la.norm(dx))
+            print('RMSE: ', RMSE, 'norm(dx): ', la.norm(dx), '\n')
 
             # updatind tie points values and exteriorOrientationParameters
             for i, im in enumerate(self.images):
@@ -230,7 +244,29 @@ class ImageBlock(object):
         return X,RMSE,sigmaX
 
 
-
+    
+    def plotNormalMatrix(self,N):
+        N11 = N[:6*len(self.images),:6*len(self.images)]
+        N12 = N[:6*len(self.images),6*len(self.images):]
+        N21 = N[6*len(self.images):,:6*len(self.images)]
+        N22 = N[6*len(self.images):,6*len(self.images):]
+        plt.figure()
+        plt.spy(N)
+        plt.title('N matrix')
+        plt.figure(figsize=(10,10))
+        plt.subplot(221)
+        plt.spy(N11)
+        plt.title('N11')
+        plt.subplot(222)
+        plt.spy(N12)
+        plt.title('N12')
+        plt.subplot(223)
+        plt.spy(N21)
+        plt.title('N21')
+        plt.subplot(224)
+        plt.spy(N22)
+        plt.title('N22 ')
+        plt.show()
     # ---------------------- Private methods ----------------------
 
     def ComputeDesignMatrix(self):
