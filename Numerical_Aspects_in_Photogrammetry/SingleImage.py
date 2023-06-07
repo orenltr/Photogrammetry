@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import linalg as la
 from matplotlib import pyplot as plt
-import matplotlib as mpl
 from Camera import *
 from MatrixMethods import Compute3DRotationMatrix, Compute3DRotationDerivativeMatrix, Compute3DRotationMatrix_RzRyRz, \
     Compute3DRotationDerivativeMatrix_RzRyRz
@@ -566,7 +565,7 @@ class SingleImage(object):
 
         return ground_points
     
-    def draw_frame(self,ax=[], anotate=False):
+    def draw_frame(self,ax=[], anotate=False, color='random'):
         
         # project frame points to ground
         ground_points = self.frame_to_ground()
@@ -576,14 +575,17 @@ class SingleImage(object):
         
         # plot the frame corners
         ax.scatter(ground_points[0,:], ground_points[1,:], c='b', s=5)
-        # plot the frame in random color
-        # Shuffle the color palette randomly
-        # Choose a predefined color palette
-        palette = mpl.colormaps['hsv']
-        # choose a random color from hsv palette
-        c = palette(np.random.randint(0, 255))
         
-        ax.plot(ground_points[0,:], ground_points[1,:], color=c, label='images frames', linewidth=5)
+        # choose color
+        if color == 'random':
+            red = np.random.randint(0, 255)
+            green = np.random.randint(0, 255)
+            blue = np.random.randint(0, 255)
+            c = (red/255, green/255, blue/255)
+        else:
+            c = color
+        
+        ax.plot(ground_points[0,:], ground_points[1,:], color=c, label='images frames', linewidth=3)
 
         
     def draw_tie_points(self, ax=[], anotate=False):

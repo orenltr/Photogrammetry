@@ -9,14 +9,15 @@ import copy
 
 # create class for simulate block of images
 class SimulateBlock:
-    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotaions_sigma=5, altitude=100):
+    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, num_strips=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotaions_sigma=5, altitude=100):
         
         self.focal_length = focal_length # in mm
         self.image_size = image_size # tuple of (width, height) in mm
         self.overlap = overlap # in fraction of image size
-        self.num_images = num_images
+        self.num_images = num_images # number of images in every strip
+        self.num_strips = num_strips # number of strips in the block
         self.tie_pattern = tie_pattern # '3 mid frame', '4 corners'
-        self.control_pattern = control_pattern # 'random block', 'random first image'
+        self.control_pattern = control_pattern # 'random block', 'random first image', '5 points'
         self.num_control_points = num_control_points
         self.rotaions_sigma = rotaions_sigma # in arcsec
         self.altitude = altitude # in m
@@ -38,6 +39,7 @@ class SimulateBlock:
     @property
     def scale(self):
         return self.focal_length/self.altitude
+    
     
     # create property for block boundaries in ground coordinates
     # return dictionary of (xmin, xmax, ymin, ymax)
@@ -115,6 +117,20 @@ class SimulateBlock:
                 first_image_boundaries = self.images[0].image_ground_bounds
                 # generate random control points
                 control_points = self.generate_random_control_points(first_image_boundaries, self.num_control_points)
+            elif self.control_pattern == '5 points':
+                backoff= 5 # m
+                block_width = self.block_boundaries['xmax'] - self.block_boundaries['xmin']
+                block_height = self.block_boundaries['ymax'] - self.block_boundaries['ymin']
+                # points pattern is 4 corners of the block and the center
+                control_points = [(self.block_boundaries['xmin']+backoff, self.block_boundaries['ymin']+backoff, 'C0'),
+                                    (self.block_boundaries['xmin']+backoff, self.block_boundaries['ymax']-backoff, 'C1'),
+                                    (self.block_boundaries['xmax']-backoff, self.block_boundaries['ymin']+backoff, 'C2'),
+                                    (self.block_boundaries['xmax']-backoff, self.block_boundaries['ymax']-backoff, 'C3'),
+                                    (self.block_boundaries['xmax']-block_width/2, self.block_boundaries['ymax']-block_height/2, 'C4')]
+                # convert to dataframe
+                control_points = pd.DataFrame(control_points, columns=['X', 'Y', 'name'])
+                control_points['Z'] = 0
+                                    
             else:
                 raise ValueError('Invalid control pattern, choose from "random block" or "random first image"')
             # add image_id
@@ -141,20 +157,43 @@ class SimulateBlock:
         return control_points
                 
             
+    # def simulate_image_locations(self):
+    #     """Simulate image locations
+    #     inputs:
+    #     overlap: overlap between images in fraction of image size
+    #     num_images: number of images
+    #     outputs:
+    #     image_locations: list of image locations
+    #     """
+    #     # calculate image locations
+    #     image_locations = []
+    #     for i in range(self.num_images):
+    #         image_locations.append((i*self.image_width*(1-self.overlap)*(1/self.scale), 0, self.altitude))
+    #     return image_locations
     def simulate_image_locations(self):
-        """Simulate image locations
-        inputs:
+        """
+        Simulate image locations
+        Arguments:
         overlap: overlap between images in fraction of image size
-        num_images: number of images
-        outputs:
+        num_images: number of images in each strip
+        num_strips: number of horizontal image strips
+        Returns:
         image_locations: list of image locations
         """
-        # calculate image locations
+        overlap = self.overlap
+        num_images = self.num_images
+        num_strips = self.num_strips
+        image_width, image_height = [*self.image_size]
+        strip_width = image_width * (num_images / self.scale) * (1 - overlap)
+        
         image_locations = []
-        for i in range(self.num_images):
-            image_locations.append((i*self.image_width*(1-self.overlap)*(1/self.scale), 0, self.altitude))
+        for strip_index in range(num_strips):            
+            for i in range(num_images):
+                x_offset = (i * image_width * (1 - overlap)) / self.scale
+                y_offset = strip_index * image_height * (1 - overlap) / self.scale
+                image_locations.append((x_offset, y_offset, self.altitude))
         return image_locations
-    
+
                 
     def simulate_block(self):
         """Simulate block of images
@@ -168,7 +207,7 @@ class SimulateBlock:
         
         
         # simulate images
-        for i in range(self.num_images):
+        for i in range(len(image_locations)):
 
             # simulate image
             image = self.simulate_image(i, self.camera, self.tie_pattern, image_locations[i])
