@@ -108,20 +108,30 @@ class SimulateBlock:
         else:
             # check control pattern
             if self.control_pattern == 'random block':
-                # get block boundaries
+                # get block boundaries of the overlapping area
                 block_boundaries = self.block_boundaries
-                # generate random control points
-                control_points = self.generate_random_control_points(block_boundaries, self.num_control_points)
+                xmin = block_boundaries['xmin'] + (1-self.overlap)*self.image_width/self.scale
+                xmax = block_boundaries['xmax'] - (1-self.overlap)*self.image_width/self.scale
+                ymin = block_boundaries['ymin'] + (1-self.overlap)*self.image_height/self.scale
+                ymax = block_boundaries['ymax'] - (1-self.overlap)*self.image_height/self.scale
+                boundaries = {'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax}                                
+                control_points = self.generate_random_control_points(boundaries, self.num_control_points)
+                
             elif self.control_pattern == 'random first image':
-                # get first image boundaries
+                # get first image boundaries without the overlapping area
                 first_image_boundaries = self.images[0].image_ground_bounds
-                # generate random control points
-                control_points = self.generate_random_control_points(first_image_boundaries, self.num_control_points)
+                xmin = first_image_boundaries['xmin']
+                xmax = first_image_boundaries['xmax'] - self.overlap*self.image_width/self.scale
+                ymin = first_image_boundaries['ymin']
+                ymax = first_image_boundaries['ymax'] - self.overlap*self.image_height/self.scale
+                boundaries = {'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax}                
+                control_points = self.generate_random_control_points(boundaries, self.num_control_points)
+                
             elif self.control_pattern == '5 points':
+                # points pattern is 4 corners of the block one in the center
                 backoff= 5 # m
                 block_width = self.block_boundaries['xmax'] - self.block_boundaries['xmin']
-                block_height = self.block_boundaries['ymax'] - self.block_boundaries['ymin']
-                # points pattern is 4 corners of the block and the center
+                block_height = self.block_boundaries['ymax'] - self.block_boundaries['ymin']                
                 control_points = [(self.block_boundaries['xmin']+backoff, self.block_boundaries['ymin']+backoff, 'C0'),
                                     (self.block_boundaries['xmin']+backoff, self.block_boundaries['ymax']-backoff, 'C1'),
                                     (self.block_boundaries['xmax']-backoff, self.block_boundaries['ymin']+backoff, 'C2'),

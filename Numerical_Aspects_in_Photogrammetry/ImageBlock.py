@@ -187,6 +187,12 @@ class ImageBlock(object):
                     if kwargs['plotNormal'] :
                         # # plotting normal matrix
                         ImageBlock.plotNormalMatrix(N)
+                        
+                # compute the eigenvalues of N
+                eigvals = la.eigvals(N)                
+                # compute the condition number of N
+                cond = np.max(eigvals)/np.min(eigvals)
+                print('iteration: ', itr, '\n condition number: ', cond, '\n')
                     
             elif method == 'schur':                  
                 # sparse matrix with Schur Complement
@@ -219,7 +225,9 @@ class ImageBlock(object):
             
             # calculate RMSE
             RMSE = np.sqrt(np.dot(v.T,v)/(A.shape[0]-A.shape[1]))            
-            # print('RMSE: ', RMSE, 'norm(dx): ', la.norm(dx), '\n')            
+            # print('RMSE: ', RMSE, 'norm(dx): ', la.norm(dx), '\n')
+            
+            sigmaX = RMSE**2 * (np.linalg.inv(N))            
 
         return X,RMSE
 
