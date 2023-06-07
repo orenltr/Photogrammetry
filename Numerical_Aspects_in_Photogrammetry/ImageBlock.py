@@ -188,11 +188,19 @@ class ImageBlock(object):
                         # # plotting normal matrix
                         ImageBlock.plotNormalMatrix(N)
                         
-                # compute the eigenvalues of N
-                eigvals = la.eigvals(N)                
-                # compute the condition number of N
-                cond = np.max(eigvals)/np.min(eigvals)
-                print('iteration: ', itr, '\n condition number: ', cond, '\n')
+                
+                # Compute the singular value decomposition of A (SVD)
+                U, s, V = np.linalg.svd(A)
+                # Compute the condition number of A
+                cond_A = np.max(s) / np.min(s)
+                
+                # Compute the singular value decomposition of N (SVD)
+                U, s, V = np.linalg.svd(N)
+                # Compute the condition number of A
+                cond_N = np.max(s) / np.min(s)
+               
+                print('iteration: ', itr, '\n condition number A: ', cond_A)
+                print(' condition number N: ', cond_N, '\n')                
                     
             elif method == 'schur':                  
                 # sparse matrix with Schur Complement
@@ -571,11 +579,14 @@ class ImageBlock(object):
        # create figure
         if ax is None:
             fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+        
         for img in self.images:
-            img.draw_frame(ax)
+            img.draw_frame(ax)        
+            
+        for img in self.images:
             img.draw_tie_points(ax, anotate=anotate)
             img.draw_control_points(ax, anotate=anotate)
-            
+        
         return ax
     
     def describe_block(self):

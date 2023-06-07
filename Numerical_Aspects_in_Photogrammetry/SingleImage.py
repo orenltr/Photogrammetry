@@ -596,7 +596,7 @@ class SingleImage(object):
             self.tie_points.apply(lambda row: ax.annotate(row['name'], (row['X'], row['Y']), size=1*(1/self.scale)), axis=1)
     
     def draw_control_points(self, ax=[], anotate=False):
-        ax.scatter(self.control_points['X'], self.control_points['Y'], marker='^', color='r', s=10*(1/self.scale) , label='GC')
+        ax.scatter(self.control_points['X'], self.control_points['Y'], marker='^', color='r', s=30*(1/self.scale) , label='GC')
 
         # anoate tie points using their names
         if anotate:

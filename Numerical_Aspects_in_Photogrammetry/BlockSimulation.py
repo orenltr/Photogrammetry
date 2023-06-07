@@ -167,19 +167,6 @@ class SimulateBlock:
         return control_points
                 
             
-    # def simulate_image_locations(self):
-    #     """Simulate image locations
-    #     inputs:
-    #     overlap: overlap between images in fraction of image size
-    #     num_images: number of images
-    #     outputs:
-    #     image_locations: list of image locations
-    #     """
-    #     # calculate image locations
-    #     image_locations = []
-    #     for i in range(self.num_images):
-    #         image_locations.append((i*self.image_width*(1-self.overlap)*(1/self.scale), 0, self.altitude))
-    #     return image_locations
     def simulate_image_locations(self):
         """
         Simulate image locations
