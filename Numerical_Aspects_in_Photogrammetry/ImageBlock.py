@@ -90,11 +90,8 @@ class ImageBlock(object):
 
         """
 
-        self.tie_points[['X', 'Y', 'Z']] = val
+        self.tie_points[['X', 'Y', 'Z']] = val        
         
-    
-    
-    
     @property
     def block_boundaries(self):
         # get images boundaries and find the min and max
@@ -112,6 +109,19 @@ class ImageBlock(object):
                 ymax = image_boundaries['ymax']
         return {'xmin': xmin, 'xmax': xmax, 'ymin': ymin, 'ymax': ymax}
     
+    @property
+    def X(self):
+        return self.compute_variables_vector()
+    
+    @property
+    def A(self):
+        return self.ComputeDesignMatrix()
+    
+    @property
+    def N(self):        
+        A = self.A
+        N = np.dot(A.T, A)
+        return N
     
     # ---------------------- methods ----------------------
     
@@ -564,9 +574,9 @@ class ImageBlock(object):
 
     def create_lb_vector(self):
         
-        # initialize lb vector with exterior orientation parameters of the first image
+        # initialize lb vector with the first image tie points and control points
         lb =np.hstack((np.ravel(self.images[0].tie_points_cam_coords.T),np.ravel(self.images[0].control_points_cam_coords.T)))
-        # add exterior orientation parameters of the rest of the images
+        # add tie points and control points of the rest of the images
         for i, im in enumerate(self.images[1:]):
             lb =np.hstack((lb,np.ravel(im.tie_points_cam_coords.T),np.ravel(im.control_points_cam_coords.T)))            
         return lb

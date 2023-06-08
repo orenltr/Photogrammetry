@@ -9,7 +9,7 @@ import copy
 
 # create class for simulate block of images
 class SimulateBlock:
-    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, num_strips=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotaions_sigma=5, altitude=100):
+    def __init__(self, focal_length, image_size, overlap=0.6 , num_images=2, num_strips=2, tie_pattern='3 mid frame', control_pattern='random block', num_control_points=4 , rotations_sigma=5, altitude=100):
         
         self.focal_length = focal_length # in mm
         self.image_size = image_size # tuple of (width, height) in mm
@@ -19,7 +19,7 @@ class SimulateBlock:
         self.tie_pattern = tie_pattern # '3 mid frame', '4 corners'
         self.control_pattern = control_pattern # 'random block', 'random first image', '5 points'
         self.num_control_points = num_control_points
-        self.rotaions_sigma = rotaions_sigma # in arcsec
+        self.rotations_sigma = rotations_sigma # in arcsec
         self.altitude = altitude # in m
         self.images = []
         self.tie_points = pd.DataFrame(columns=['x', 'y', 'name', 'image_id', 'X', 'Y', 'Z'])
@@ -67,7 +67,7 @@ class SimulateBlock:
         # simulate tie points
         tie_points = self.simulate_tie_points(tie_pattern, image_id=image_id)
         # simulate rotation angles
-        rotation = self.simulate_rotation(self.rotaions_sigma)
+        rotation = self.simulate_rotation(self.rotations_sigma)
         exteriorOrientationParameters = np.concatenate((location, rotation))
         # initialize image
         image = SingleImage(camera, image_id, exteriorOrientationParameters, tie_points)
@@ -302,14 +302,7 @@ class SimulateBlock:
             if sigma_location is not None:  
                 # add noise to location
                 img.exteriorOrientationParameters[:3] += np.random.normal(0, sigma_location, 3)
-            # if sigma_image_points is not None:
-            #     # add noise to image samples
-            #     img.tie_points[['x', 'y']] += np.random.normal(0, sigma_image_points, img.tie_points[['x', 'y']].shape) * 1e-3 # convert to mm
-            #     img.control_points[['x', 'y']] += np.random.normal(0, sigma_image_points, img.control_points[['x', 'y']].shape) * 1e-3 # convert to mm
-            # if sigma_tie_points is not None:
-            #     # add noise to tie points
-            #     img.tie_points[['X', 'Y', 'Z']] += np.random.normal(0, sigma_tie_points, img.tie_points[['X', 'Y', 'Z']].shape)
-        
+
         # add noise to tie points
         block.tie_points[['X', 'Y', 'Z']] += np.random.normal(0, sigma_tie_points, block.tie_points[['X', 'Y', 'Z']].shape)
         # add noise to image samples
@@ -317,11 +310,5 @@ class SimulateBlock:
         if 'x' in block.control_points.columns:
             block.control_points[['x', 'y']] += np.random.normal(0, sigma_image_points, block.control_points[['x', 'y']].shape) * 1e-3 # convert to mm
         
-        # block.update_images()
         
-                
-        
-    
-
-
     
