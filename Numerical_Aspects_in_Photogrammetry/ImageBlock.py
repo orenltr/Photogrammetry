@@ -115,7 +115,9 @@ class ImageBlock(object):
     
     @property
     def A(self):
-        return self.ComputeDesignMatrix()
+        A = self.ComputeDesignMatrix()
+        A = A.astype(np.float64)
+        return A
     
     @property
     def N(self):        
@@ -160,6 +162,7 @@ class ImageBlock(object):
         # create a data frame with columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa'] for each image and tie points coordinates and iteration number
         variables = pd.DataFrame(columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa']*len(self.images)+['X', 'Y', 'Z']*len(self.T_coordinates))
         observation = pd.DataFrame(columns=['x', 'y']*int(len(lb)/2))
+        condition_numbers = pd.DataFrame(columns=['A','N'])
 
         dx = np.ones([6, 1]) * 100000
         itr = 0
@@ -188,6 +191,7 @@ class ImageBlock(object):
             # # print report for iteration of exterior orientation parameters and camera coordinates
             # print('EOP: ', X[:6*len(self.images)],'\n')
             
+            
             if method == 'naive':
                 U = np.dot(A.T, L)
                 N = np.dot(A.T, A)
@@ -197,17 +201,12 @@ class ImageBlock(object):
                     if kwargs['plotNormal'] :
                         # # plotting normal matrix
                         ImageBlock.plotNormalMatrix(N)
-                        
+                                                    
+                # Compute the condition number
+                cond_A = ImageBlock.conditionNumber(A)
+                cond_N = ImageBlock.conditionNumber(N)
                 
-                # Compute the singular value decomposition of A (SVD)
-                U, s, V = np.linalg.svd(A)
-                # Compute the condition number of A
-                cond_A = np.max(s) / np.min(s)
-                
-                # Compute the singular value decomposition of N (SVD)
-                U, s, V = np.linalg.svd(N)
-                # Compute the condition number of A
-                cond_N = np.max(s) / np.min(s)
+                condition_numbers = condition_numbers.append({'A': cond_A, 'N': cond_N}, ignore_index=True)
                
                 print('iteration: ', itr, '\n condition number A: ', cond_A)
                 print(' condition number N: ', cond_N, '\n')                
@@ -247,7 +246,7 @@ class ImageBlock(object):
             
             sigmaX = RMSE**2 * (np.linalg.inv(N))            
 
-        return X,RMSE
+        return X, RMSE, sigmaX, condition_numbers
 
 
     
@@ -420,6 +419,29 @@ class ImageBlock(object):
         N12i = np.hstack(list(map(populateN12i, np.arange(self.tie_points.shape[0]))))
             
         return N12i
+    
+    def correlation_matrix(self):
+        # compute the covariance matrix
+        Cov = np.linalg.inv(self.N) #
+
+        # compute the correlation matrix
+        diag_sqrt = np.sqrt(np.diag(Cov))
+        correlation_matrix = Cov / np.outer(diag_sqrt, diag_sqrt)
+
+        # Mask the upper triangle of the correlation matrix
+        mask = np.tri(correlation_matrix.shape[0], k=-1).astype(bool).T
+        correlation_matrix = np.ma.array(correlation_matrix, mask=mask)
+        return correlation_matrix
+
+        
+    
+    @staticmethod
+    def conditionNumber(M):
+        # Compute the singular value decomposition of M (SVD)
+        U, s, V = np.linalg.svd(M)
+        # Compute the condition number of M
+        cond = np.max(s) / np.min(s)
+        return cond
     # ---------------------- Private methods ----------------------
 
     def ComputeDesignMatrix(self):

@@ -1,0 +1,795 @@
+configuration 0: control pattern: random block, tie pattern: 3 mid frame, overlap: 0.6
+iteration:  1 
+ condition number A:  72163.367581631
+ condition number N:  5207551907.147144 
+
+iteration:  2 
+ condition number A:  72403.41240525892
+ condition number N:  5242253417.054879 
+
+iteration:  3 
+ condition number A:  72406.89355615669
+ condition number N:  5242758376.036896 
+
+configuration 1: control pattern: random first image, tie pattern: 3 mid frame, overlap: 0.6
+iteration:  1 
+ condition number A:  1.0509828656526258e+16
+ condition number N:  1.0483570408112764e+16 
+
+iteration:  2 
+ condition number A:  1.0523257010953344e+16
+ condition number N:  1.049769313051698e+16 
+
+iteration:  3 
+ condition number A:  1.0540774291006052e+16
+ condition number N:  1.0530091370939022e+16 
+
+iteration:  4 
+ condition number A:  1.1001269667427764e+16
+ condition number N:  1.1237494486786372e+16 
+
+iteration:  5 
+ condition number A:  1.3286116286617364e+16
+ condition number N:  1.4861148018353242e+16 
+
+iteration:  6 
+ condition number A:  1.0568150597721192e+16
+ condition number N:  2.600781217235575e+16 
+
+iteration:  7 
+ condition number A:  1.3983671323041456e+16
+ condition number N:  5.220424172053313e+16 
+
+iteration:  8 
+ condition number A:  1.0939604932321654e+16
+ condition number N:  6.47469699744692e+16 
+
+iteration:  9 
+ condition number A:  1.000872331949148e+16
+ condition number N:  2.9877889435438144e+16 
+
+iteration:  10 
+ condition number A:  1.0029064435007148e+16
+ condition number N:  1.8742381992122125e+17 
+
+iteration:  11 
+ condition number A:  1.0071310322166282e+16
+ condition number N:  1.9407075896364883e+17 
+
+iteration:  12 
+ condition number A:  1.0008309839690676e+16
+ condition number N:  7.738939850481165e+16 
+
+iteration:  13 
+ condition number A:  1.3996939736879332e+16
+ condition number N:  7.599242417085381e+16 
+
+iteration:  14 
+ condition number A:  1.330378415755261e+18
+ condition number N:  2.413668526356365e+16 
+
+iteration:  15 
+ condition number A:  2.0747791243676833e+18
+ condition number N:  1.2123492915017222e+16 
+
+iteration:  16 
+ condition number A:  1.0013888518254142e+16
+ condition number N:  1.0008631739211538e+16 
+
+iteration:  17 
+ condition number A:  1.410828709066814e+16
+ condition number N:  1.7024044480970016e+16 
+
+iteration:  18 
+ condition number A:  3.938450038923162e+19
+ condition number N:  3.8063171396277407e+18 
+
+iteration:  19 
+ condition number A:  6.559605378870423e+17
+ condition number N:  3.641193050070935e+17 
+
+iteration:  20 
+ condition number A:  1.5532680198613853e+17
+ condition number N:  5.283706685233472e+17 
+
+iteration:  21 
+ condition number A:  1.0985126871165869e+18
+ condition number N:  1.8338196138486188e+18 
+
+Exception occurred for configuration 1
+configuration 2: control pattern: 5 points, tie pattern: 3 mid frame, overlap: 0.6
+iteration:  1 
+ condition number A:  21556.00671943988
+ condition number N:  464661443.43086964 
+
+iteration:  2 
+ condition number A:  21566.140214133688
+ condition number N:  465098408.2566469 
+
+iteration:  3 
+ condition number A:  21567.17529642153
+ condition number N:  465143050.11777115 
+
+configuration 3: control pattern: random block, tie pattern: 4 corners, overlap: 0.6
+iteration:  1 
+ condition number A:  35188.68942802636
+ condition number N:  1238243862.641358 
+
+iteration:  2 
+ condition number A:  35379.763003724154
+ condition number N:  1251727667.9001062 
+
+iteration:  3 
+ condition number A:  35379.90648923672
+ condition number N:  1251737780.6824174 
+
+configuration 4: control pattern: random first image, tie pattern: 4 corners, overlap: 0.6
+iteration:  1 
+ condition number A:  1.0030861899869244e+16
+ condition number N:  1.0020819989770514e+16 
+
+iteration:  2 
+ condition number A:  1.0030333552887068e+16
+ condition number N:  1.0020532898236212e+16 
+
+iteration:  3 
+ condition number A:  1.0323605486448278e+16
+ condition number N:  2251799813685249.0 
+
+iteration:  4 
+ condition number A:  1.161121581604424e+16
+ condition number N:  1.2281301391846668e+16 
+
+iteration:  5 
+ condition number A:  1.180000494101705e+16
+ condition number N:  1.1092583168371094e+16 
+
+iteration:  6 
+ condition number A:  1.1416209352260082e+16
+ condition number N:  1.0152726065333056e+16 
+
+iteration:  7 
+ condition number A:  1.0216899276146744e+16
+ condition number N:  1.7276114430190762e+16 
+
+iteration:  8 
+ condition number A:  1.00087866495468e+16
+ condition number N:  5.952754841155986e+16 
+
+iteration:  9 
+ condition number A:  1.0009353891788652e+16
+ condition number N:  2.328271274475478e+16 
+
+iteration:  10 
+ condition number A:  1.0042951767940242e+16
+ condition number N:  5.876285943107867e+16 
+
+iteration:  11 
+ condition number A:  1.2091948846209406e+16
+ condition number N:  2.7782043872147124e+16 
+
+iteration:  12 
+ condition number A:  1.0091056328271804e+16
+ condition number N:  2.188396210715111e+16 
+
+iteration:  13 
+ condition number A:  1.0431394347416426e+16
+ condition number N:  2.1526281172820376e+16 
+
+iteration:  14 
+ condition number A:  1.0062274057741792e+16
+ condition number N:  6.4569261167638e+17 
+
+iteration:  15 
+ condition number A:  1.0008164554722048e+16
+ condition number N:  6.628701542127043e+16 
+
+iteration:  16 
+ condition number A:  1.6113342548890678e+16
+ condition number N:  1.1558359788513206e+17 
+
+iteration:  17 
+ condition number A:  2.499222798742503e+16
+ condition number N:  3.27217209345838e+17 
+
+iteration:  18 
+ condition number A:  2.5067675031879584e+16
+ condition number N:  2.0480492383526192e+17 
+
+iteration:  19 
+ condition number A:  3.4341558436321492e+16
+ condition number N:  2.2921566090044396e+16 
+
+iteration:  20 
+ condition number A:  1.0516453343100083e+18
+ condition number N:  3.3695769008719716e+16 
+
+iteration:  21 
+ condition number A:  1.820146030614502e+17
+ condition number N:  7.90155858558203e+17 
+
+Exception occurred for configuration 4
+configuration 5: control pattern: 5 points, tie pattern: 4 corners, overlap: 0.6
+iteration:  1 
+ condition number A:  12679.335833749406
+ condition number N:  160765557.3933714 
+
+iteration:  2 
+ condition number A:  12639.75241869398
+ condition number N:  159763341.26863536 
+
+iteration:  3 
+ condition number A:  12640.289952391859
+ condition number N:  159776930.57966846 
+
+configuration 6: control pattern: random block, tie pattern: 3 mid frame, overlap: 0.7
+iteration:  1 
+ condition number A:  17300.312541762705
+ condition number N:  299300815.8119703 
+
+iteration:  2 
+ condition number A:  17247.724837811416
+ condition number N:  297484013.64561856 
+
+iteration:  3 
+ condition number A:  17248.41020602517
+ condition number N:  297507652.66200054 
+
+configuration 7: control pattern: random first image, tie pattern: 3 mid frame, overlap: 0.7
+iteration:  1 
+ condition number A:  1.0874448848374662e+16
+ condition number N:  1.0656733277111224e+16 
+
+iteration:  2 
+ condition number A:  1.0206982469830922e+16
+ condition number N:  1.057132135892288e+16 
+
+iteration:  3 
+ condition number A:  1.0976948281153142e+16
+ condition number N:  1.0696134406726826e+16 
+
+iteration:  4 
+ condition number A:  1.1128150121496018e+16
+ condition number N:  1.1055569507193404e+16 
+
+iteration:  5 
+ condition number A:  1.0460284693930014e+16
+ condition number N:  1.0259436163446358e+16 
+
+iteration:  6 
+ condition number A:  1.0047608217874628e+16
+ condition number N:  1.727825693421824e+16 
+
+iteration:  7 
+ condition number A:  1.0091407593643164e+16
+ condition number N:  1.019097711254763e+16 
+
+iteration:  8 
+ condition number A:  1.0012267527163732e+16
+ condition number N:  6.983963511533129e+16 
+
+iteration:  9 
+ condition number A:  1.0043664428562474e+16
+ condition number N:  1.6543985401450582e+16 
+
+iteration:  10 
+ condition number A:  1.0092163890077166e+16
+ condition number N:  8.0556780319076e+16 
+
+iteration:  11 
+ condition number A:  1.0166763870789038e+16
+ condition number N:  6.122892366942362e+16 
+
+iteration:  12 
+ condition number A:  1.1463507142750868e+16
+ condition number N:  5.557299477412279e+16 
+
+iteration:  13 
+ condition number A:  1.3188498739064998e+16
+ condition number N:  9.10300271387306e+16 
+
+iteration:  14 
+ condition number A:  3.0520314949341236e+16
+ condition number N:  4.177472290171905e+16 
+
+iteration:  15 
+ condition number A:  1.3493718283222962e+17
+ condition number N:  3.129863164058983e+18 
+
+iteration:  16 
+ condition number A:  1.0240340299735458e+17
+ condition number N:  2.865602482214463e+17 
+
+iteration:  17 
+ condition number A:  8.125254028657506e+16
+ condition number N:  6.451545224293823e+17 
+
+iteration:  18 
+ condition number A:  1.9475768893963104e+17
+ condition number N:  8.740208479973039e+17 
+
+Exception occurred for configuration 7
+configuration 8: control pattern: 5 points, tie pattern: 3 mid frame, overlap: 0.7
+iteration:  1 
+ condition number A:  24079.36019450751
+ condition number N:  579815589.3345673 
+
+iteration:  2 
+ condition number A:  24298.362626017213
+ condition number N:  590410407.9502435 
+
+iteration:  3 
+ condition number A:  24302.745611254548
+ condition number N:  590623465.4888451 
+
+configuration 9: control pattern: random block, tie pattern: 4 corners, overlap: 0.7
+iteration:  1 
+ condition number A:  22573.882002545077
+ condition number N:  509580134.7354893 
+
+iteration:  2 
+ condition number A:  22759.978989855594
+ condition number N:  518016622.7650777 
+
+iteration:  3 
+ condition number A:  22761.69542669256
+ condition number N:  518094783.8710225 
+
+configuration 10: control pattern: random first image, tie pattern: 4 corners, overlap: 0.7
+iteration:  1 
+ condition number A:  1.0038135739183872e+16
+ condition number N:  1.003375689595926e+16 
+
+iteration:  2 
+ condition number A:  1.0037560321617502e+16
+ condition number N:  1.0032841242134906e+16 
+
+iteration:  3 
+ condition number A:  1.0037558005936576e+16
+ condition number N:  1.0032837083367658e+16 
+
+iteration:  4 
+ condition number A:  1.0037558005859746e+16
+ condition number N:  1.0032837083167298e+16 
+
+iteration:  5 
+ condition number A:  1.0037558005911536e+16
+ condition number N:  1.0032837083254124e+16 
+
+iteration:  6 
+ condition number A:  1.1042225505048454e+16
+ condition number N:  1.1274164578335532e+16 
+
+iteration:  7 
+ condition number A:  1.0037558005889346e+16
+ condition number N:  1.0032837083240116e+16 
+
+iteration:  8 
+ condition number A:  1.0628167896833182e+16
+ condition number N:  1.089243490252271e+16 
+
+iteration:  9 
+ condition number A:  1.0622065014388024e+16
+ condition number N:  1.1700591437336186e+16 
+
+iteration:  10 
+ condition number A:  1.1312163701415492e+16
+ condition number N:  1.003446748807634e+16 
+
+iteration:  11 
+ condition number A:  1.4237669472480576e+16
+ condition number N:  2.027280377888865e+17 
+
+iteration:  12 
+ condition number A:  1.0015211531966388e+16
+ condition number N:  1.4624035107701246e+16 
+
+iteration:  13 
+ condition number A:  1.0041140059670612e+16
+ condition number N:  1.8802072539166198e+17 
+
+iteration:  14 
+ condition number A:  1.0009356805549688e+16
+ condition number N:  1.0340254944231419e+17 
+
+iteration:  15 
+ condition number A:  1.00156945309865e+16
+ condition number N:  1.9363836585270874e+17 
+
+iteration:  16 
+ condition number A:  1.0258816458888314e+16
+ condition number N:  6.691762775812486e+16 
+
+iteration:  17 
+ condition number A:  1.0546751484034308e+16
+ condition number N:  2.2337296496754244e+16 
+
+iteration:  18 
+ condition number A:  1.0201195517919536e+16
+ condition number N:  2.8254301907495144e+16 
+
+iteration:  19 
+ condition number A:  1.0040949493999134e+16
+ condition number N:  1.0185940482793514e+17 
+
+iteration:  20 
+ condition number A:  3.5707303921249556e+16
+ condition number N:  9.04084750148737e+16 
+
+iteration:  21 
+ condition number A:  1.0016737456349106e+16
+ condition number N:  1.4181199967714662e+17 
+
+iteration:  22 
+ condition number A:  9.510459962584317e+17
+ condition number N:  2.6164782244369064e+19 
+
+iteration:  23 
+ condition number A:  1.8511244952892465e+18
+ condition number N:  8.249293785129914e+16 
+
+iteration:  24 
+ condition number A:  3.4296960287574314e+20
+ condition number N:  1.6787042268224704e+17 
+
+iteration:  25 
+ condition number A:  5.339365303173079e+18
+ condition number N:  1.4885093445868782e+18 
+
+Exception occurred for configuration 10
+configuration 11: control pattern: 5 points, tie pattern: 4 corners, overlap: 0.7
+iteration:  1 
+ condition number A:  10908.766379872155
+ condition number N:  119001183.71874322 
+
+iteration:  2 
+ condition number A:  10886.609467158642
+ condition number N:  118518265.50788184 
+
+iteration:  3 
+ condition number A:  10887.127866024903
+ condition number N:  118529553.04774855 
+
+configuration 12: control pattern: random block, tie pattern: 3 mid frame, overlap: 0.8
+iteration:  1 
+ condition number A:  18078.361903521214
+ condition number N:  326827171.5069454 
+
+iteration:  2 
+ condition number A:  17995.06621044461
+ condition number N:  323822406.698769 
+
+iteration:  3 
+ condition number A:  17995.495875107255
+ condition number N:  323837872.7071553 
+
+configuration 13: control pattern: random first image, tie pattern: 3 mid frame, overlap: 0.8
+iteration:  1 
+ condition number A:  1.031261388919791e+16
+ condition number N:  1.027758729668125e+16 
+
+iteration:  2 
+ condition number A:  1.035604454154853e+16
+ condition number N:  1.0286382712099634e+16 
+
+iteration:  3 
+ condition number A:  1.0810216019724828e+16
+ condition number N:  1.065322684895223e+16 
+
+iteration:  4 
+ condition number A:  1.047483563741018e+16
+ condition number N:  1.0415806635526912e+16 
+
+iteration:  5 
+ condition number A:  1.0458727710315318e+16
+ condition number N:  1.4189568128657344e+16 
+
+iteration:  6 
+ condition number A:  1.0039545474810196e+16
+ condition number N:  2.032120730896523e+16 
+
+iteration:  7 
+ condition number A:  1.0173882454033746e+16
+ condition number N:  1.8031491819794052e+16 
+
+iteration:  8 
+ condition number A:  1.0008624671380976e+16
+ condition number N:  2.4264560464884586e+17 
+
+iteration:  9 
+ condition number A:  1.047957442086149e+16
+ condition number N:  3.3790323823373828e+16 
+
+iteration:  10 
+ condition number A:  1.005526301299432e+16
+ condition number N:  1.85231843981597e+18 
+
+iteration:  11 
+ condition number A:  2.681978518029244e+16
+ condition number N:  1.873531048578438e+17 
+
+iteration:  12 
+ condition number A:  6.980938429280234e+16
+ condition number N:  7.244562497752005e+16 
+
+iteration:  13 
+ condition number A:  7.358050105140198e+16
+ condition number N:  8.033127496790086e+16 
+
+iteration:  14 
+ condition number A:  1.0470930284566898e+17
+ condition number N:  3.1775781068412237e+18 
+
+iteration:  15 
+ condition number A:  1.141457338728579e+16
+ condition number N:  7.767786256647691e+18 
+
+iteration:  16 
+ condition number A:  1.26634316420719e+16
+ condition number N:  4.211258580860563e+17 
+
+Exception occurred for configuration 13
+configuration 14: control pattern: 5 points, tie pattern: 3 mid frame, overlap: 0.8
+iteration:  1 
+ condition number A:  22936.53740397321
+ condition number N:  526084744.771753 
+
+iteration:  2 
+ condition number A:  22927.95308968388
+ condition number N:  525691024.577921 
+
+iteration:  3 
+ condition number A:  22928.366409548667
+ condition number N:  525709976.01966065 
+
+configuration 15: control pattern: random block, tie pattern: 4 corners, overlap: 0.8
+iteration:  1 
+ condition number A:  14778.897488530183
+ condition number N:  218415808.4964799 
+
+iteration:  2 
+ condition number A:  14792.643135513343
+ condition number N:  218822288.01546285 
+
+iteration:  3 
+ condition number A:  14793.448061765133
+ condition number N:  218846104.4064666 
+
+configuration 16: control pattern: random first image, tie pattern: 4 corners, overlap: 0.8
+iteration:  1 
+ condition number A:  1.004857435067715e+16
+ condition number N:  1.0052499647221804e+16 
+
+iteration:  2 
+ condition number A:  1.0047923047040234e+16
+ condition number N:  1.0051753863568158e+16 
+
+iteration:  3 
+ condition number A:  1.0047917678765372e+16
+ condition number N:  1.0051747837803272e+16 
+
+iteration:  4 
+ condition number A:  1.2516907774276844e+16
+ condition number N:  1.081052512313298e+16 
+
+iteration:  5 
+ condition number A:  1.021417742604244e+16
+ condition number N:  7.022071714840692e+16 
+
+iteration:  6 
+ condition number A:  1.2881176369064138e+16
+ condition number N:  1.3730592093270125e+17 
+
+iteration:  7 
+ condition number A:  1.003959544153531e+16
+ condition number N:  3.4563811127750764e+16 
+
+iteration:  8 
+ condition number A:  1.002630957572431e+16
+ condition number N:  1.8080457178957978e+17 
+
+iteration:  9 
+ condition number A:  1.0008055450830724e+16
+ condition number N:  1.2374210591874171e+17 
+
+iteration:  10 
+ condition number A:  3.3176270032691396e+16
+ condition number N:  2.0564688110170083e+17 
+
+iteration:  11 
+ condition number A:  4.2845275546326554e+17
+ condition number N:  1.008363766975117e+18 
+
+iteration:  12 
+ condition number A:  5.3279542531171656e+16
+ condition number N:  2.295146511239749e+16 
+
+iteration:  13 
+ condition number A:  1.8653077405111972e+18
+ condition number N:  4.171979851904612e+17 
+
+iteration:  14 
+ condition number A:  6.85336621678004e+20
+ condition number N:  2.1639215386436657e+19 
+
+iteration:  15 
+ condition number A:  1.0875365129236169e+18
+ condition number N:  3.358172827459603e+17 
+
+Exception occurred for configuration 16
+configuration 17: control pattern: 5 points, tie pattern: 4 corners, overlap: 0.8
+iteration:  1 
+ condition number A:  12641.930273287795
+ condition number N:  159818401.17996752 
+
+iteration:  2 
+ condition number A:  12539.840775040057
+ condition number N:  157247605.04515964 
+
+iteration:  3 
+ condition number A:  12540.096457001979
+ condition number N:  157254018.93301517 
+
+configuration 18: control pattern: random block, tie pattern: 3 mid frame, overlap: 0.9
+iteration:  1 
+ condition number A:  33163.35503452859
+ condition number N:  1099808193.3056748 
+
+iteration:  2 
+ condition number A:  32740.24069057397
+ condition number N:  1071923409.6363705 
+
+iteration:  3 
+ condition number A:  32741.62044595945
+ condition number N:  1072013667.2517653 
+
+configuration 19: control pattern: random first image, tie pattern: 3 mid frame, overlap: 0.9
+iteration:  1 
+ condition number A:  1.0086386497470288e+16
+ condition number N:  1.0137153607972404e+16 
+
+iteration:  2 
+ condition number A:  1.0088035462269316e+16
+ condition number N:  1.0139692562854516e+16 
+
+iteration:  3 
+ condition number A:  1.0088020575294642e+16
+ condition number N:  1.0139669727388468e+16 
+
+iteration:  4 
+ condition number A:  6.559841308058341e+18
+ condition number N:  1.0203117511811646e+16 
+
+iteration:  5 
+ condition number A:  1.3277055336596942e+16
+ condition number N:  2.4731666116521228e+16 
+
+iteration:  6 
+ condition number A:  1.0512013423989084e+16
+ condition number N:  1.751819223734526e+17 
+
+iteration:  7 
+ condition number A:  1.2222177846652508e+16
+ condition number N:  5.182329758073469e+16 
+
+iteration:  8 
+ condition number A:  1.0027764414869818e+16
+ condition number N:  1.1619059333936847e+18 
+
+iteration:  9 
+ condition number A:  1.522756312974833e+16
+ condition number N:  4.822134829679445e+18 
+
+iteration:  10 
+ condition number A:  1.0182971106982878e+16
+ condition number N:  2.78650056203153e+18 
+
+iteration:  11 
+ condition number A:  5.0518808719927144e+16
+ condition number N:  1.195576577067474e+17 
+
+iteration:  12 
+ condition number A:  2.8469962962343098e+17
+ condition number N:  5.159870883985393e+18 
+
+iteration:  13 
+ condition number A:  5.381427966743621e+16
+ condition number N:  7.605007688698846e+16 
+
+iteration:  14 
+ condition number A:  1.608676238414236e+17
+ condition number N:  2.7344868061528435e+17 
+
+iteration:  15 
+ condition number A:  3.353272361873089e+17
+ condition number N:  4.055441981872609e+17 
+
+iteration:  16 
+ condition number A:  2.8688006925111635e+17
+ condition number N:  6.997516995380269e+16 
+
+iteration:  17 
+ condition number A:  1.911464945129174e+18
+ condition number N:  4.3175445575479895e+18 
+
+iteration:  18 
+ condition number A:  1.2293515080040212e+18
+ condition number N:  1.901072778130829e+18 
+
+iteration:  19 
+ condition number A:  1.1537043537278899e+20
+ condition number N:  6.120626949636574e+19 
+
+Exception occurred for configuration 19
+configuration 20: control pattern: 5 points, tie pattern: 3 mid frame, overlap: 0.9
+iteration:  1 
+ condition number A:  14338.454837159934
+ condition number N:  205591287.16520473 
+
+iteration:  2 
+ condition number A:  14200.280739825635
+ condition number N:  201647968.47960415 
+
+iteration:  3 
+ condition number A:  14202.506874775849
+ condition number N:  201711199.32382762 
+
+configuration 21: control pattern: random block, tie pattern: 4 corners, overlap: 0.9
+iteration:  1 
+ condition number A:  22431.678966508378
+ condition number N:  503180221.32066005 
+
+iteration:  2 
+ condition number A:  19913.93409529436
+ condition number N:  396564769.69232714 
+
+iteration:  3 
+ condition number A:  19910.82874255611
+ condition number N:  396441096.88151246 
+
+configuration 22: control pattern: random first image, tie pattern: 4 corners, overlap: 0.9
+iteration:  1 
+ condition number A:  1.0061586853312618e+16
+ condition number N:  1.00767953765851e+16 
+
+iteration:  2 
+ condition number A:  1.0063215235776466e+16
+ condition number N:  1.0079233894778602e+16 
+
+iteration:  3 
+ condition number A:  1.0063212063320654e+16
+ condition number N:  1.0079228810458054e+16 
+
+iteration:  4 
+ condition number A:  1.0063212063352842e+16
+ condition number N:  1.00792288105014e+16 
+
+iteration:  5 
+ condition number A:  1.0063212063352984e+16
+ condition number N:  1.0079228810501682e+16 
+
+iteration:  6 
+ condition number A:  1.0063212063352944e+16
+ condition number N:  1.00792288105016e+16 
+
+iteration:  7 
+ condition number A:  1.0063212063353084e+16
+ condition number N:  1.0079228810501824e+16 
+
+iteration:  8 
+ condition number A:  1.0063212063353054e+16
+ condition number N:  1.0079228810501788e+16 
+
+configuration 23: control pattern: 5 points, tie pattern: 4 corners, overlap: 0.9
+iteration:  1 
+ condition number A:  20182.677188633697
+ condition number N:  407340458.4956518 
+
+iteration:  2 
+ condition number A:  17782.88724557942
+ condition number N:  316231078.7865593 
+
+iteration:  3 
+ condition number A:  17778.677503872783
+ condition number N:  316081373.77532303 
+

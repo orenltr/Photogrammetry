@@ -1,0 +1,25 @@
+,overlap,tie_pattern,control_pattern,A_condition,N_condition,failed_runs
+0,0.6,3 mid frame,random block,72163.37,5207551907.15,FALSE
+1,0.6,3 mid frame,random first image,10509828656526200.00,10483570408112700.00,TRUE
+2,0.6,3 mid frame,5 points,21556.01,464661443.43,FALSE
+3,0.6,4 corners,random block,35188.69,1238243862.64,FALSE
+4,0.6,4 corners,random first image,10030861899869200.00,10020819989770500.00,TRUE
+5,0.6,4 corners,5 points,12679.34,160765557.39,FALSE
+6,0.7,3 mid frame,random block,17300.31,299300815.81,FALSE
+7,0.7,3 mid frame,random first image,10874448848374600.00,10656733277111200.00,TRUE
+8,0.7,3 mid frame,5 points,24079.36,579815589.33,FALSE
+9,0.7,4 corners,random block,22573.88,509580134.74,FALSE
+10,0.7,4 corners,random first image,10038135739183800.00,10033756895959200.00,TRUE
+11,0.7,4 corners,5 points,10908.77,119001183.72,FALSE
+12,0.8,3 mid frame,random block,18078.36,326827171.51,FALSE
+13,0.8,3 mid frame,random first image,10312613889197900.00,10277587296681200.00,TRUE
+14,0.8,3 mid frame,5 points,22936.54,526084744.77,FALSE
+15,0.8,4 corners,random block,14778.90,218415808.50,FALSE
+16,0.8,4 corners,random first image,10048574350677100.00,10052499647221800.00,TRUE
+17,0.8,4 corners,5 points,12641.93,159818401.18,FALSE
+18,0.9,3 mid frame,random block,33163.36,1099808193.31,FALSE
+19,0.9,3 mid frame,random first image,10086386497470200.00,10137153607972400.00,TRUE
+20,0.9,3 mid frame,5 points,14338.45,205591287.17,FALSE
+21,0.9,4 corners,random block,22431.68,503180221.32,FALSE
+22,0.9,4 corners,random first image,10061586853312600.00,10076795376585100.00,FALSE
+23,0.9,4 corners,5 points,20182.68,407340458.50,FALSE
