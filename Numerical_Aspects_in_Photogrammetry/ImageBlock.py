@@ -248,6 +248,125 @@ class ImageBlock(object):
 
         return X, RMSE, sigmaX, condition_numbers
 
+    def LevenbergMarquardt(self, epsilon, max_itr, method='naive', **kwargs):
+        """
+        BundleAdjustment for images block
+        :param epsilon: stoping condition for norm(dx)
+        :param max_itr: maximum number of iterations
+        :param method: method for solving the normal equation (naive, schur)
+        :return: exterior orientation parameters, tie points coordinate, RMSE
+        :rtype: np.array nx1, scalar, np.array mxm
+        """
+
+        # creating lb vector
+        lb = self.create_lb_vector()
+        
+        # create vaiables to track the values of the variables
+        # create a data frame with columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa'] for each image and tie points coordinates and iteration number
+        variables = pd.DataFrame(columns=['X0', 'Y0', 'Z0', 'omega', 'phi', 'kappa']*len(self.images)+['X', 'Y', 'Z']*len(self.T_coordinates))
+        observation = pd.DataFrame(columns=['x', 'y']*int(len(lb)/2))
+        condition_numbers = pd.DataFrame(columns=['A','N'])
+
+        dx = np.ones([6, 1]) * 100000
+        itr = 0
+        first = True # flag for first iteration
+        while la.norm(dx) > epsilon and itr < max_itr:
+            itr += 1
+
+            if first:
+                X = self.compute_variables_vector()
+                l0 = self.compute_observation_vector()
+                L = lb - l0
+                A = self.ComputeDesignMatrix()
+                
+                # convert all to float64
+                lb = lb.astype(np.float64)
+                X = X.astype(np.float64)
+                l0 = l0.astype(np.float64)
+                L = L.astype(np.float64)
+                A = A.astype(np.float64)
+                
+                # update variables data frame
+                variables.loc[len(variables)] = np.ravel(X)
+                # update observation data frame
+                observation.loc[len(observation)] = np.ravel(l0)                       
+                
+                # compute normal matrix
+                U = np.dot(A.T, L)
+                N = np.dot(A.T, A)
+                dx = np.dot(la.inv(N), U)
+                
+                # initial lambda
+                lam = 1/1000 * np.max(np.diag(N))
+                 
+                first = False
+                                          
+            # check if N+lam*I is invertible
+            try:
+                dx_new = np.dot(np.linalg.inv(N + lam*np.eye(*N.shape)), U)
+                X_new = X + dx_new                  
+            except np.linalg.LinAlgError:
+                print('N + lam*I is singular, lambda = ', lam, '\n')
+                lam *= 2.0
+                continue
+                    
+            # updatind tie points values and exteriorOrientationParameters
+            for i, im in enumerate(self.images):
+                im.exteriorOrientationParameters = X_new[6*i:6*i+6]
+            self.T_coordinates = np.reshape(X_new[6*len(self.images):],(len(self.T_coordinates),3))
+            
+            l0_new = self.compute_observation_vector()
+            L_new = lb - l0_new
+            
+            if (la.norm(L_new) < la.norm(L)) and (la.norm(dx_new) < la.norm(dx)):
+                dx = dx_new
+                X = X_new
+                l0 = l0_new
+                L = L_new
+                A = self.ComputeDesignMatrix()
+                U = np.dot(A.T, L)
+                N = np.dot(A.T, A)
+                lam /= 3.0
+                
+                
+            
+                
+            else: # if the new values are not better than the old ones 
+                X = X_new-dx_new
+                for i, im in enumerate(self.images):
+                    im.exteriorOrientationParameters = X_new[6*i:6*i+6]
+                self.T_coordinates = np.reshape(X_new[6*len(self.images):],(len(self.T_coordinates),3))
+                lam *= 2.0
+            
+                
+            
+            if 'plotNormal' in kwargs:
+                if kwargs['plotNormal'] :
+                    # # plotting normal matrix
+                    ImageBlock.plotNormalMatrix(N)
+                                                
+            # Compute the condition number
+            cond_A = ImageBlock.conditionNumber(A)
+            cond_N = ImageBlock.conditionNumber(N)
+            
+            condition_numbers = condition_numbers.append({'A': cond_A, 'N': cond_N}, ignore_index=True)
+            
+            print('iteration: ', itr, '\n condition number A: ', cond_A)
+            print(' condition number N: ', cond_N, '\n')                
+                    
+
+            # # update variables
+            # X = X + dx
+            
+            # report accuracy
+            v = A.dot(dx) - L
+            RMSE = np.sqrt(np.dot(v.T,v)/(A.shape[0]-A.shape[1]))            
+            print('RMSE: ', RMSE, 'norm(dx): ', la.norm(dx), '\n')
+
+ 
+        sigmaX = RMSE**2 * (np.linalg.inv(N))            
+
+        return X, RMSE, sigmaX, condition_numbers
 
     
     def plotNormalBlocks(N11, N12, N22):
